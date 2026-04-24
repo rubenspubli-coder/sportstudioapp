@@ -31,8 +31,7 @@ const server = http.createServer((req, res) => {
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': API_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-beta': 'messages-2023-12-15'
+          'anthropic-version': '2023-06-01'
         }
       };
 
