@@ -37,6 +37,11 @@ const server = http.createServer((req, res) => {
 
       const apiReq = https.request(options, apiRes => {
         console.log('API response status:', apiRes.statusCode);
+        let responseBody = '';
+        apiRes.on('data', chunk => responseBody += chunk);
+        apiRes.on('end', () => {
+          console.log('API response body:', responseBody);
+        });
         res.writeHead(apiRes.statusCode, {
           'Content-Type': apiRes.headers['content-type'] || 'application/json',
           'Access-Control-Allow-Origin': '*'
