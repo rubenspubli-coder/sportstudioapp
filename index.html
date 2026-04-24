@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///Users/locacao/Downloads/index_11.html -->
+<!-- saved from url=(0045)file:///Users/locacao/Downloads/index_12.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -243,7 +243,7 @@ header {
     <div id="hist"><div class="no-hist">Nenhuma conversa ainda.<br>Comece digitando abaixo.</div></div>
   </div>
   <div class="main">
-    <div id="chat"></div>
+    <div id="chat"><div class="msg bot"><div class="av bot">SS</div><div class="mc"><div><p>Vamos nessa! Descreva o que você deseja criar e use o botão de imagem para anexar a foto do atleta de referência.</p></div></div></div></div>
     <div class="inp">
       <div id="img-previews"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -308,7 +308,7 @@ header {
       <svg viewBox="0 0 36 36" fill="none"><rect x="4" y="6" width="28" height="22" rx="3" stroke="#888" stroke-width="1.5"></rect><circle cx="12" cy="13" r="2.5" stroke="#888" stroke-width="1.3"></circle><path d="M4 22l7-6 6 5 5-4 10 7" stroke="#888" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 28v4M15 30h6" stroke="#888" stroke-width="1.5" stroke-linecap="round"></path></svg>
       <div class="um-dz-text">Clique ou arraste uma imagem aqui<br><strong>JPG, PNG, WebP</strong></div>
     </div>
-    <div id="um-preview-wrap"><img id="um-preview" src="file:///Users/locacao/Downloads/index_11.html" alt="preview"><button class="um-change" onclick="document.getElementById(&#39;um-file&#39;).click()">Trocar imagem</button></div>
+    <div id="um-preview-wrap"><img id="um-preview" src="file:///Users/locacao/Downloads/index_12.html" alt="preview"><button class="um-change" onclick="document.getElementById(&#39;um-file&#39;).click()">Trocar imagem</button></div>
     <div id="um-result-wrap"><div class="um-result-label">Prompt de Upscale Gerado</div><div id="um-result-text" style="background:#0a1a08;border:1px solid var(--gdim);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;color:#9add90;white-space:pre-wrap;word-break:break-word;max-height:120px;overflow-y:auto;"></div><button id="um-copy-btn" style="background:var(--gdim);color:var(--green);border:none;border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;font-weight:500;width:100%;margin-top:4px;" onclick="copyUpscalePrompt()">Copiar prompt de upscale</button></div>
     <div id="um-status"></div>
     <button id="um-upscale-btn" disabled="" onclick="runUpscale()">Fazer Upscale</button>
@@ -317,8 +317,29 @@ header {
 </div>
 
 <script>
-const BASE_STYLE = `Ultra-realistic 3D character render, photorealistic skin texture, AAA video game graphics style. A highly realistic cinematic 3D scene, refined geometry emphasizing authentic human proportions and reduced stylization, ultra-detailed fabric simulation showing natural cloth tension, micro-wrinkles, stitching, and subtle dirt wear, lifelike skin shading with pores, slight sweat reflection and subsurface scattering. Lighting using balanced three-point and soft rim light, cinematic anamorphic bokeh, gaussian depth blur, atmospheric haze and volumetric diffusion, dynamic rack focus across faces, subtle lens breathing shift, blurred crowd background, ultra-realistic details, high-resolution textures, sharp focus, realistic lighting and shadows, color-accurate rendering, intense artificial candy tones, 8K clarity, Pixar-inspired stylized proportions, RenderMan (Pixar), MoonRay (DreamWorks), MGLR (lumination), Cartoonity Sora, Unreal Engine 5, Unity.\`;
-const SYSTEM_PROMPT = (angle, proportion, description) => `You generate exactly 3 image prompts. Output ONLY the 3 prompts in the format below. No intro. No questions. No explanations.BASE STYLE to apply to every prompt: ${BASE_STYLE}ATHLETE/SCENE: ${description || 'a professional sports athlete in dynamic action — invent specific details about sport, physique, uniform, expression and pose'}CAMERA ANGLE: ${angle || 'cinematic medium shot'}END EVERY PROMPT WITH: ${proportion || ''}Rules:- Each prompt on ONE single line — no line breaks within a prompt- Start every prompt with: "Next-generation render of a [athlete description],"- Include the camera angle naturally in each prompt- Vary mood, environment, lighting, and action between the 3 prompts- All prompts in EnglishOUTPUT FORMAT — EXACTLY THIS, NOTHING ELSE:**Prompt 1:**[full prompt on one single line ending with ${proportion || ''}]**Prompt 2:**[full prompt on one single line ending with ${proportion || ''}]**Prompt 3:**[full prompt on one single line ending with ${proportion || ''}]Qual prompt você escolhe? 1, 2 ou 3?\`
+const BASE_STYLE = "Ultra-realistic 3D character render, photorealistic skin texture, AAA video game graphics style. A highly realistic cinematic 3D scene, refined geometry emphasizing authentic human proportions and reduced stylization, ultra-detailed fabric simulation showing natural cloth tension, micro-wrinkles, stitching, and subtle dirt wear, lifelike skin shading with pores, slight sweat reflection and subsurface scattering. Lighting using balanced three-point and soft rim light, cinematic anamorphic bokeh, gaussian depth blur, atmospheric haze and volumetric diffusion, dynamic rack focus across faces, subtle lens breathing shift, blurred crowd background, ultra-realistic details, high-resolution textures, sharp focus, realistic lighting and shadows, color-accurate rendering, intense artificial candy tones, 8K clarity, Pixar-inspired stylized proportions, RenderMan (Pixar), MoonRay (DreamWorks), MGLR (lumination), Cartoonity Sora, Unreal Engine 5, Unity.";
+const SYSTEM_PROMPT = function(angle, proportion, description) {
+  var desc = description || "a professional sports athlete in dynamic action — invent specific details about sport, physique, uniform, expression and pose";
+  var ang = angle || "cinematic medium shot";
+  var prop = proportion || "";
+  var propEnd = prop ? " ending with " + prop : "";
+  return "You generate exactly 3 image prompts. Output ONLY the 3 prompts in the format below. No intro. No questions. No explanations.\n\n"
+    + "BASE STYLE to apply to every prompt: " + BASE_STYLE + "\n\n"
+    + "ATHLETE/SCENE: " + desc + "\n\n"
+    + "CAMERA ANGLE: " + ang + "\n\n"
+    + (prop ? "END EVERY PROMPT WITH: " + prop + "\n\n" : "")
+    + "Rules:\n"
+    + "- Each prompt on ONE single line — no line breaks within a prompt\n"
+    + "- Start every prompt with: \"Next-generation render of a [athlete description],\"\n"
+    + "- Include the camera angle naturally in each prompt\n"
+    + "- Vary mood, environment, lighting, and action between the 3 prompts\n"
+    + "- All prompts in English\n\n"
+    + "OUTPUT FORMAT — EXACTLY THIS, NOTHING ELSE:\n\n"
+    + "**Prompt 1:**\n[full prompt on one single line" + propEnd + "]\n\n"
+    + "**Prompt 2:**\n[full prompt on one single line" + propEnd + "]\n\n"
+    + "**Prompt 3:**\n[full prompt on one single line" + propEnd + "]\n\n"
+    + "Qual prompt você escolhe? 1, 2 ou 3?";
+};
 
 let history = [], lastPrompts = [], initialized = false;
 let sessions = [];
@@ -603,7 +624,7 @@ async function runUpscale() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 500,
         messages: [{ role: "user", content: [
           { type: "image", source: { type: "base64", media_type: upscaleType, data: upscaleB64 } },
@@ -681,7 +702,7 @@ async function send(ov) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 2500,
         stream: true,
         system: SYSTEM_PROMPT(selectedAngle||"", selectedRatio||"", rawText),
@@ -719,24 +740,7 @@ let globalAuthenticated=true;
 
 async function boot() {
   if (initialized) return; initialized=true; sb_btn.disabled=true;
-  if (globalAuthenticated) { addMsg('bot','Vamos nessa! Descreva o que você deseja criar e use o botão de imagem para anexar a foto do atleta de referência.'); sb_btn.disabled=false; return; }
-  const t=addMsg('bot','',true);
-  try {
-    const response = await fetch("/api", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 80,
-        system: SYSTEM_PROMPT("","",""),
-        messages: [{ role: "user", content: "start" }]
-      })
-    });
-    const data=await response.json();
-    const reply=data.content?.[0]?.text||'Vamos nessa! Descreva o que você deseja criar e use o botão de imagem para anexar a foto do atleta de referência.';
-    history.push({role:'user',content:'start'}); history.push({role:'assistant',content:reply});
-    t.remove(); addMsg('bot',reply);
-  } catch { t.remove(); addMsg('bot','Vamos nessa! Descreva o que você deseja criar e use o botão de imagem para anexar a foto do atleta de referência.'); }
+  addMsg('bot','Vamos nessa! Descreva o que você deseja criar e use o botão de imagem para anexar a foto do atleta de referência.');
   sb_btn.disabled=false;
 }
 
