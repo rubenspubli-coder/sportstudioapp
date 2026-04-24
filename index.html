@@ -732,7 +732,7 @@ async function send(ov) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-3-5-sonnet-20241022",
         max_tokens: 2500,
         stream: true,
         system: SYSTEM_PROMPT,
@@ -778,7 +778,7 @@ async function boot() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-3-5-sonnet-20241022",
         max_tokens: 80,
         system: SYSTEM_PROMPT,
         messages: [{ role: "user", content: "start" }]
