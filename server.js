@@ -9,6 +9,23 @@ const API_KEY = (process.env.GEMINI_API_KEY || '').trim();
 console.log('GEMINI API_KEY length:', API_KEY.length);
 console.log('GEMINI API_KEY starts with:', API_KEY.substring(0, 15));
 
+// Lista modelos disponíveis no startup
+https.get(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`, res => {
+  let data = '';
+  res.on('data', chunk => data += chunk);
+  res.on('end', () => {
+    try {
+      const models = JSON.parse(data);
+      const available = models.models
+        .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+        .map(m => m.name);
+      console.log('Available Gemini models:', available.join(', '));
+    } catch(e) {
+      console.log('Could not list models:', data.substring(0, 200));
+    }
+  });
+}).on('error', err => console.log('List models error:', err.message));
+
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -23,7 +40,6 @@ const server = http.createServer((req, res) => {
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
       console.log('POST /api received, body length:', body.length);
-
       try {
         const parsed = JSON.parse(body);
         const systemPrompt = parsed.system || '';
@@ -47,10 +63,9 @@ const server = http.createServer((req, res) => {
           generationConfig: { maxOutputTokens: 2500 }
         });
 
-        const MODEL = 'gemini-1.5-flash-002';
+        const MODEL = 'gemini-2.0-flash-lite';
         const endpoint = `/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
-
-        console.log('Calling Gemini endpoint:', endpoint.substring(0, 60));
+        console.log('Calling:', endpoint.substring(0, 70));
 
         const options = {
           hostname: 'generativelanguage.googleapis.com',
@@ -64,7 +79,7 @@ const server = http.createServer((req, res) => {
           let responseBody = '';
           apiRes.on('data', chunk => responseBody += chunk);
           apiRes.on('end', () => {
-            console.log('Gemini full response:', responseBody.substring(0, 300));
+            console.log('Gemini response:', responseBody.substring(0, 300));
             try {
               const geminiData = JSON.parse(responseBody);
               const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -78,16 +93,14 @@ const server = http.createServer((req, res) => {
         });
 
         apiReq.on('error', err => {
-          console.error('Gemini API Error:', err.message);
+          console.error('API Error:', err.message);
           res.writeHead(500);
           res.end(JSON.stringify({ error: err.message }));
         });
 
         apiReq.write(geminiBody);
         apiReq.end();
-
       } catch(e) {
-        console.error('Body parse error:', e.message);
         res.writeHead(400);
         res.end(JSON.stringify({ error: 'Invalid body' }));
       }
