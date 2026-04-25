@@ -48,7 +48,7 @@ const server = http.createServer((req, res) => {
           generationConfig: { maxOutputTokens: 2500 }
         });
 
-        const MODEL = 'gemini-1.5-flash';
+        const MODEL = 'gemini-1.5-flash-001';
         const endpoint = `/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
         console.log('Calling Gemini endpoint:', endpoint.substring(0, 60));
