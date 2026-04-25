@@ -48,10 +48,12 @@ const server = http.createServer((req, res) => {
           generationConfig: { maxOutputTokens: 2500 }
         });
 
-        const MODEL = 'gemini-1.5-flash';
+        const MODEL = 'gemini-1.5-flash-latest';
         const endpoint = stream
           ? `/v1beta/models/${MODEL}:streamGenerateContent?alt=sse&key=${API_KEY}`
           : `/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+
+        console.log('Calling Gemini endpoint:', endpoint.substring(0, 60));
 
         const options = {
           hostname: 'generativelanguage.googleapis.com',
@@ -78,30 +80,26 @@ const server = http.createServer((req, res) => {
                 const data = line.slice(6).trim();
                 if (!data || data === '[DONE]') continue;
                 try {
-                  const parsed = JSON.parse(data);
-                  const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                  const evt = JSON.parse(data);
+                  const text = evt.candidates?.[0]?.content?.parts?.[0]?.text || '';
                   if (text) {
-                    const evt = JSON.stringify({ type: 'content_block_delta', delta: { type: 'text_delta', text } });
-                    res.write(`data: ${evt}\n\n`);
+                    const out = JSON.stringify({ type: 'content_block_delta', delta: { type: 'text_delta', text } });
+                    res.write(`data: ${out}\n\n`);
                   }
                 } catch(e) {}
               }
             });
-            apiRes.on('end', () => {
-              res.write('data: [DONE]\n\n');
-              res.end();
-            });
+            apiRes.on('end', () => { res.write('data: [DONE]\n\n'); res.end(); });
           } else {
             let responseBody = '';
             apiRes.on('data', chunk => responseBody += chunk);
             apiRes.on('end', () => {
-              console.log('Gemini response body:', responseBody.substring(0, 300));
+              console.log('Gemini full response:', responseBody);
               try {
                 const geminiData = JSON.parse(responseBody);
                 const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                const anthropicFormat = JSON.stringify({ content: [{ type: 'text', text }] });
                 res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-                res.end(anthropicFormat);
+                res.end(JSON.stringify({ content: [{ type: 'text', text }] }));
               } catch(e) {
                 res.writeHead(500);
                 res.end(JSON.stringify({ error: 'Parse error' }));
