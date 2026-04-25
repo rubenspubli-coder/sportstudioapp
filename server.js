@@ -53,7 +53,7 @@ const server = http.createServer((req, res) => {
         });
 
         const openaiBody = JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: 'gpt-4o',
           max_tokens: 2500,
           stream: stream,
           messages: openaiMessages
