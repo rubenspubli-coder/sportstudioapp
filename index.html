@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///Users/locacao/Downloads/index_32.html -->
+<!-- saved from url=(0045)file:///Users/locacao/Downloads/index_33.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -422,7 +422,7 @@ header {
       <svg viewBox="0 0 36 36" fill="none"><rect x="4" y="6" width="28" height="22" rx="3" stroke="#888" stroke-width="1.5"></rect><circle cx="12" cy="13" r="2.5" stroke="#888" stroke-width="1.3"></circle><path d="M4 22l7-6 6 5 5-4 10 7" stroke="#888" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 28v4M15 30h6" stroke="#888" stroke-width="1.5" stroke-linecap="round"></path></svg>
       <div class="um-dz-text">Clique ou arraste uma imagem aqui<br><strong>JPG, PNG, WebP</strong></div>
     </div>
-    <div id="um-preview-wrap"><img id="um-preview" src="file:///Users/locacao/Downloads/index_32.html" alt="preview"><button class="um-change" onclick="document.getElementById(&#39;um-file&#39;).click()">Trocar imagem</button></div>
+    <div id="um-preview-wrap"><img id="um-preview" src="file:///Users/locacao/Downloads/index_33.html" alt="preview"><button class="um-change" onclick="document.getElementById(&#39;um-file&#39;).click()">Trocar imagem</button></div>
     <div id="um-result-wrap"><div class="um-result-label">Prompt de Upscale Gerado</div><div id="um-result-text" style="background:#0a1a08;border:1px solid var(--gdim);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;color:#9add90;white-space:pre-wrap;word-break:break-word;max-height:120px;overflow-y:auto;"></div><button id="um-copy-btn" style="background:var(--gdim);color:var(--green);border:none;border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;font-weight:500;width:100%;margin-top:4px;" onclick="copyUpscalePrompt()">Copiar prompt de upscale</button></div>
     <div id="um-status"></div>
     <button id="um-upscale-btn" disabled="" onclick="runUpscale()">Fazer Upscale</button>
@@ -433,12 +433,34 @@ header {
 <script>
 const BASE_STYLE = "Ultra-realistic 3D character render, photorealistic skin texture, AAA video game graphics style. A highly realistic cinematic 3D scene, refined geometry emphasizing authentic human proportions and reduced stylization, ultra-detailed fabric simulation showing natural cloth tension, micro-wrinkles, stitching, and subtle dirt wear, lifelike skin shading with pores, slight sweat reflection and subsurface scattering. Lighting using balanced three-point and soft rim light, cinematic anamorphic bokeh, gaussian depth blur, atmospheric haze and volumetric diffusion, dynamic rack focus across faces, subtle lens breathing shift, blurred crowd background, ultra-realistic details, high-resolution textures, sharp focus, realistic lighting and shadows, color-accurate rendering, intense artificial candy tones, 8K clarity, Pixar-inspired stylized proportions, RenderMan (Pixar), MoonRay (DreamWorks), MGLR (lumination), Cartoonity Sora, Unreal Engine 5, Unity.";
 const SYSTEM_PROMPT = function(angle, proportion, description, hasImage) {
-  var desc = description || (hasImage
-    ? "the athlete shown in the reference image — analyze their exact appearance, sport, uniform, physique and pose from the image"
-    : "a professional sports athlete in dynamic action — invent specific details about sport, physique, uniform, expression and pose");
   var ang = angle || "cinematic medium shot";
   var prop = proportion || "";
   var propEnd = prop ? " ending with " + prop : "";
+
+  if (hasImage) {
+    return "You are an expert AI image prompt generator for AAA sports video game visuals.\n\n"
+      + "A reference image has been provided. Your job is:\n"
+      + "1. Carefully study the person in the image: face shape, skin tone, hair color and style, eye color, body proportions, clothing, expression, pose.\n"
+      + "2. Generate 3 image prompts that recreate THIS EXACT PERSON with the AAA game visual style below applied — do NOT change who the person is, do NOT invent a sport or transform them into a generic athlete.\n"
+      + "3. Keep all their real physical features. Only apply the visual style treatment.\n\n"
+      + "ADDITIONAL CONTEXT (if provided by user): " + (description || "none — use only what you see in the image") + "\n\n"
+      + "AAA VISUAL STYLE to apply to every prompt:\n" + BASE_STYLE + "\n\n"
+      + "CAMERA ANGLE: " + ang + "\n\n"
+      + (prop ? "END EVERY PROMPT WITH: " + prop + "\n\n" : "")
+      + "Rules:\n"
+      + "- Each prompt on ONE single line — no line breaks within a prompt\n"
+      + "- Start every prompt with: \"Next-generation AAA render of a [exact physical description from the image],\"\n"
+      + "- Embed the person's real face, hair, skin, clothing details from the image into every prompt\n"
+      + "- Vary camera angle, lighting mood and background between the 3 prompts\n"
+      + "- All prompts in English\n\n"
+      + "OUTPUT FORMAT — EXACTLY THIS, NOTHING ELSE:\n\n"
+      + "**Prompt 1:**\n[full prompt on one single line" + propEnd + "]\n\n"
+      + "**Prompt 2:**\n[full prompt on one single line" + propEnd + "]\n\n"
+      + "**Prompt 3:**\n[full prompt on one single line" + propEnd + "]\n\n"
+      + "Qual prompt você escolhe? 1, 2 ou 3?";
+  }
+
+  var desc = description || "a professional sports athlete in dynamic action — invent specific details about sport, physique, uniform, expression and pose";
   return "You generate exactly 3 image prompts. Output ONLY the 3 prompts in the format below. No intro. No questions. No explanations.\n\n"
     + "BASE STYLE to apply to every prompt: " + BASE_STYLE + "\n\n"
     + "ATHLETE/SCENE: " + desc + "\n\n"
@@ -648,37 +670,36 @@ function isHeic(file) {
     file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
 }
 
-function convertHeicToJpeg(file, callback) {
-  // HEIC não é suportado nativamente — orienta o usuário
+function isSupportedImage(file) {
+  return file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+}
+
+function showHeicWarning() {
+  const existing = document.getElementById('heic-warning');
+  if (existing) return;
   const msg = document.createElement('div');
+  msg.id = 'heic-warning';
   msg.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #ff5555;color:#ff9090;padding:14px 20px;border-radius:10px;font-size:13px;z-index:999;max-width:340px;text-align:center;line-height:1.5;';
-  msg.innerHTML = '⚠️ Fotos HEIC do iPhone não são suportadas diretamente.<br>No seu iPhone, vá em <strong>Configurações → Câmera → Formatos</strong> e selecione <strong>Mais Compatível</strong> para salvar em JPEG.';
+  msg.innerHTML = '⚠️ Fotos HEIC do iPhone não são suportadas.<br>Vá em <strong>Configurações → Câmera → Formatos</strong> e selecione <strong>Mais Compatível</strong> para salvar em JPEG.';
   document.body.appendChild(msg);
-  setTimeout(() => msg.remove(), 6000);
-  callback(null, null);
+  setTimeout(() => msg.remove(), 7000);
 }
 
 function addImages(files) {
   const remaining=MAX_IMGS-pendingImages.length;
   const toAdd=Array.from(files).slice(0,remaining);
+  let hasHeic=false;
+  const valid = toAdd.filter(f => {
+    if (isHeic(f)) { hasHeic=true; return false; }
+    return isSupportedImage(f);
+  });
+  if (hasHeic) showHeicWarning();
+  if (valid.length === 0) return;
   let loaded=0;
-  const total = toAdd.filter(f => f.type.startsWith('image/') || isHeic(f)).length;
-  if (total === 0) return;
-  toAdd.forEach(file=>{
-    if (!file.type.startsWith('image/') && !isHeic(file)) return;
-    if (isHeic(file)) {
-      convertHeicToJpeg(file, (url, type) => {
-        if (url) {
-          pendingImages.push({b64:url.split(',')[1],type:type,dataUrl:url,name:file.name||'imagem'});
-        }
-        loaded++;
-        if (loaded===total) updateImgUI();
-      });
-    } else {
-      const r=new FileReader();
-      r.onload=ev=>{ const url=ev.target.result; pendingImages.push({b64:url.split(',')[1],type:file.type,dataUrl:url,name:file.name||'imagem'}); loaded++; if (loaded===total) updateImgUI(); };
-      r.readAsDataURL(file);
-    }
+  valid.forEach(file=>{
+    const r=new FileReader();
+    r.onload=ev=>{ const url=ev.target.result; pendingImages.push({b64:url.split(',')[1],type:file.type,dataUrl:url,name:file.name||'imagem'}); loaded++; if (loaded===valid.length) updateImgUI(); };
+    r.readAsDataURL(file);
   });
 }
 
