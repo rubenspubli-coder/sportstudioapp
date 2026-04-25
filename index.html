@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///Users/locacao/Downloads/index_50.html -->
+<!-- saved from url=(0045)file:///Users/locacao/Downloads/index_51.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -440,7 +440,7 @@ header {
       <svg viewBox="0 0 36 36" fill="none"><rect x="4" y="6" width="28" height="22" rx="3" stroke="#888" stroke-width="1.5"></rect><circle cx="12" cy="13" r="2.5" stroke="#888" stroke-width="1.3"></circle><path d="M4 22l7-6 6 5 5-4 10 7" stroke="#888" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 28v4M15 30h6" stroke="#888" stroke-width="1.5" stroke-linecap="round"></path></svg>
       <div class="um-dz-text">Clique ou arraste uma imagem aqui<br><strong>JPG, PNG, WebP</strong></div>
     </div>
-    <div id="um-preview-wrap"><img id="um-preview" src="file:///Users/locacao/Downloads/index_50.html" alt="preview"><button class="um-change" onclick="document.getElementById(&#39;um-file&#39;).click()">Trocar imagem</button></div>
+    <div id="um-preview-wrap"><img id="um-preview" src="file:///Users/locacao/Downloads/index_51.html" alt="preview"><button class="um-change" onclick="document.getElementById(&#39;um-file&#39;).click()">Trocar imagem</button></div>
     <div id="um-result-wrap"><div class="um-result-label">Prompt de Upscale Gerado</div><div id="um-result-text" style="background:#0a1a08;border:1px solid var(--gdim);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;color:#9add90;white-space:pre-wrap;word-break:break-word;max-height:120px;overflow-y:auto;"></div><button id="um-copy-btn" style="background:var(--gdim);color:var(--green);border:none;border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;font-weight:500;width:100%;margin-top:4px;" onclick="copyUpscalePrompt()">Copiar prompt de upscale</button></div>
     <div id="um-status"></div>
     <button id="um-upscale-btn" disabled="" onclick="runUpscale()">Fazer Upscale</button>
@@ -467,8 +467,10 @@ const SYSTEM_PROMPT = function(angle, proportion, description, hasImage) {
       + (prop ? "END EVERY PROMPT WITH: " + prop + "\n\n" : "")
       + "Rules:\n"
       + "- Each prompt on ONE single line — no line breaks within a prompt\n"
+      + "- Each prompt MUST be at least 120 words long — include rich visual detail\n"
       + "- Start every prompt with: \"Next-generation AAA render of a [exact physical description from the image],\"\n"
       + "- Embed the person's real face, hair, skin, clothing details from the image into every prompt\n"
+      + "- Include detailed lighting setup, environment atmosphere, camera lens details, color grading\n"
       + "- Vary camera angle, lighting mood and background between the 3 prompts\n"
       + "- All prompts in English\n\n"
       + "OUTPUT FORMAT — EXACTLY THIS, NOTHING ELSE:\n\n"
@@ -486,8 +488,10 @@ const SYSTEM_PROMPT = function(angle, proportion, description, hasImage) {
     + (prop ? "END EVERY PROMPT WITH: " + prop + "\n\n" : "")
     + "Rules:\n"
     + "- Each prompt on ONE single line — no line breaks within a prompt\n"
+    + "- Each prompt MUST be at least 120 words long — include rich visual detail\n"
     + "- Start every prompt with: \"Next-generation render of a [athlete description],\"\n"
     + "- Include the camera angle naturally in each prompt\n"
+    + "- Include detailed lighting setup, environment atmosphere, camera lens details, color grading\n"
     + "- Vary mood, environment, lighting, and action between the 3 prompts\n"
     + "- All prompts in English\n\n"
     + "OUTPUT FORMAT — EXACTLY THIS, NOTHING ELSE:\n\n"
@@ -714,6 +718,23 @@ function showHeicWarning() {
   setTimeout(() => msg.remove(), 7000);
 }
 
+function compressImage(dataUrl, callback) {
+  const img = new Image();
+  img.onload = function() {
+    const MAX = 800;
+    let w = img.width, h = img.height;
+    if (w > MAX || h > MAX) {
+      if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+      else { w = Math.round(w * MAX / h); h = MAX; }
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    callback(canvas.toDataURL('image/jpeg', 0.75));
+  };
+  img.src = dataUrl;
+}
+
 function addImages(files) {
   const remaining=MAX_IMGS-pendingImages.length;
   const toAdd=Array.from(files).slice(0,remaining);
@@ -727,7 +748,13 @@ function addImages(files) {
   let loaded=0;
   valid.forEach(file=>{
     const r=new FileReader();
-    r.onload=ev=>{ const url=ev.target.result; pendingImages.push({b64:url.split(',')[1],type:file.type,dataUrl:url,name:file.name||'imagem'}); loaded++; if (loaded===valid.length) updateImgUI(); };
+    r.onload=ev=>{
+      compressImage(ev.target.result, (compressed) => {
+        pendingImages.push({b64:compressed.split(',')[1],type:'image/jpeg',dataUrl:compressed,name:file.name||'imagem'});
+        loaded++;
+        if (loaded===valid.length) updateImgUI();
+      });
+    };
     r.readAsDataURL(file);
   });
 }
