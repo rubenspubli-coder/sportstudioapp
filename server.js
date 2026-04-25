@@ -4,27 +4,10 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 8080;
-const API_KEY = (process.env.GEMINI_API_KEY || '').trim();
+const API_KEY = (process.env.ANTHROPIC_API_KEY || '').trim();
 
-console.log('GEMINI API_KEY length:', API_KEY.length);
-console.log('GEMINI API_KEY starts with:', API_KEY.substring(0, 15));
-
-// Lista modelos disponíveis no startup
-https.get(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`, res => {
-  let data = '';
-  res.on('data', chunk => data += chunk);
-  res.on('end', () => {
-    try {
-      const models = JSON.parse(data);
-      const available = models.models
-        .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
-        .map(m => m.name);
-      console.log('Available Gemini models:', available.join(', '));
-    } catch(e) {
-      console.log('Could not list models:', data.substring(0, 200));
-    }
-  });
-}).on('error', err => console.log('List models error:', err.message));
+console.log('API_KEY length:', API_KEY.length);
+console.log('API_KEY starts with:', API_KEY.substring(0, 15));
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -40,70 +23,35 @@ const server = http.createServer((req, res) => {
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
       console.log('POST /api received, body length:', body.length);
-      try {
-        const parsed = JSON.parse(body);
-        const systemPrompt = parsed.system || '';
-        const messages = parsed.messages || [];
 
-        const geminiContents = messages.map(m => {
-          if (typeof m.content === 'string') {
-            return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] };
-          }
-          const parts = m.content.map(c => {
-            if (c.type === 'text') return { text: c.text };
-            if (c.type === 'image') return { inlineData: { mimeType: c.source.media_type, data: c.source.data } };
-            return null;
-          }).filter(Boolean);
-          return { role: m.role === 'assistant' ? 'model' : 'user', parts };
+      const options = {
+        hostname: 'api.anthropic.com',
+        path: '/v1/messages',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': API_KEY,
+          'anthropic-version': '2023-06-01'
+        }
+      };
+
+      const apiReq = https.request(options, apiRes => {
+        console.log('API response status:', apiRes.statusCode);
+        res.writeHead(apiRes.statusCode, {
+          'Content-Type': apiRes.headers['content-type'] || 'application/json',
+          'Access-Control-Allow-Origin': '*'
         });
+        apiRes.pipe(res);
+      });
 
-        const geminiBody = JSON.stringify({
-          system_instruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined,
-          contents: geminiContents,
-          generationConfig: { maxOutputTokens: 2500 }
-        });
+      apiReq.on('error', err => {
+        console.error('API Error:', err.message);
+        res.writeHead(500);
+        res.end(JSON.stringify({ error: err.message }));
+      });
 
-        const MODEL = 'gemini-2.0-flash';
-        const endpoint = `/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
-        console.log('Calling:', endpoint.substring(0, 70));
-
-        const options = {
-          hostname: 'generativelanguage.googleapis.com',
-          path: endpoint,
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        };
-
-        const apiReq = https.request(options, apiRes => {
-          console.log('Gemini response status:', apiRes.statusCode);
-          let responseBody = '';
-          apiRes.on('data', chunk => responseBody += chunk);
-          apiRes.on('end', () => {
-            console.log('Gemini response:', responseBody.substring(0, 300));
-            try {
-              const geminiData = JSON.parse(responseBody);
-              const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-              res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-              res.end(JSON.stringify({ content: [{ type: 'text', text }] }));
-            } catch(e) {
-              res.writeHead(500);
-              res.end(JSON.stringify({ error: 'Parse error' }));
-            }
-          });
-        });
-
-        apiReq.on('error', err => {
-          console.error('API Error:', err.message);
-          res.writeHead(500);
-          res.end(JSON.stringify({ error: err.message }));
-        });
-
-        apiReq.write(geminiBody);
-        apiReq.end();
-      } catch(e) {
-        res.writeHead(400);
-        res.end(JSON.stringify({ error: 'Invalid body' }));
-      }
+      apiReq.write(body);
+      apiReq.end();
     });
     return;
   }
