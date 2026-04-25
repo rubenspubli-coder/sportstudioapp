@@ -28,7 +28,7 @@ const server = http.createServer((req, res) => {
         const parsed = JSON.parse(body);
         const systemPrompt = parsed.system || '';
         const messages = parsed.messages || [];
-        const stream = parsed.stream || false;
+        const stream = false; // Gemini: força modo não-streaming
 
         const geminiContents = messages.map(m => {
           if (typeof m.content === 'string') {
@@ -48,10 +48,8 @@ const server = http.createServer((req, res) => {
           generationConfig: { maxOutputTokens: 2500 }
         });
 
-        const MODEL = 'gemini-1.5-flash-latest';
-        const endpoint = stream
-          ? `/v1beta/models/${MODEL}:streamGenerateContent?alt=sse&key=${API_KEY}`
-          : `/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+        const MODEL = 'gemini-1.5-flash';
+        const endpoint = `/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
         console.log('Calling Gemini endpoint:', endpoint.substring(0, 60));
 
@@ -64,48 +62,20 @@ const server = http.createServer((req, res) => {
 
         const apiReq = https.request(options, apiRes => {
           console.log('Gemini response status:', apiRes.statusCode);
-
-          if (stream) {
-            res.writeHead(200, {
-              'Content-Type': 'text/event-stream',
-              'Access-Control-Allow-Origin': '*'
-            });
-            let buffer = '';
-            apiRes.on('data', chunk => {
-              buffer += chunk.toString();
-              const lines = buffer.split('\n');
-              buffer = lines.pop();
-              for (const line of lines) {
-                if (!line.startsWith('data: ')) continue;
-                const data = line.slice(6).trim();
-                if (!data || data === '[DONE]') continue;
-                try {
-                  const evt = JSON.parse(data);
-                  const text = evt.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                  if (text) {
-                    const out = JSON.stringify({ type: 'content_block_delta', delta: { type: 'text_delta', text } });
-                    res.write(`data: ${out}\n\n`);
-                  }
-                } catch(e) {}
-              }
-            });
-            apiRes.on('end', () => { res.write('data: [DONE]\n\n'); res.end(); });
-          } else {
-            let responseBody = '';
-            apiRes.on('data', chunk => responseBody += chunk);
-            apiRes.on('end', () => {
-              console.log('Gemini full response:', responseBody);
-              try {
-                const geminiData = JSON.parse(responseBody);
-                const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-                res.end(JSON.stringify({ content: [{ type: 'text', text }] }));
-              } catch(e) {
-                res.writeHead(500);
-                res.end(JSON.stringify({ error: 'Parse error' }));
-              }
-            });
-          }
+          let responseBody = '';
+          apiRes.on('data', chunk => responseBody += chunk);
+          apiRes.on('end', () => {
+            console.log('Gemini full response:', responseBody.substring(0, 300));
+            try {
+              const geminiData = JSON.parse(responseBody);
+              const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+              res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+              res.end(JSON.stringify({ content: [{ type: 'text', text }] }));
+            } catch(e) {
+              res.writeHead(500);
+              res.end(JSON.stringify({ error: 'Parse error' }));
+            }
+          });
         });
 
         apiReq.on('error', err => {
@@ -132,6 +102,6 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(data);
   });
-}); 
+});
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
