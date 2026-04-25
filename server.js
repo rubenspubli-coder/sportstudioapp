@@ -24,47 +24,39 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       console.log('POST /api received, body length:', body.length);
 
-      try {
-        const parsed = JSON.parse(body);
-        const outBody = JSON.stringify({
-          ...parsed,
-          model: 'claude-haiku-4-5-20251001'
+      const options = {
+        hostname: 'api.anthropic.com',
+        path: '/v1/messages',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': API_KEY,
+          'anthropic-version': '2023-06-01'
+        }
+      };
+
+      const apiReq = https.request(options, apiRes => {
+        console.log('API response status:', apiRes.statusCode);
+        let responseBody = '';
+        apiRes.on('data', chunk => responseBody += chunk);
+        apiRes.on('end', () => {
+          console.log('API response body:', responseBody);
         });
-
-        const options = {
-          hostname: 'api.anthropic.com',
-          path: '/v1/messages',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': API_KEY,
-            'anthropic-version': '2023-06-01'
-          }
-        };
-
-        const apiReq = https.request(options, apiRes => {
-          console.log('API response status:', apiRes.statusCode);
-          res.writeHead(apiRes.statusCode, {
-            'Content-Type': apiRes.headers['content-type'] || 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          });
-          apiRes.pipe(res);
+        res.writeHead(apiRes.statusCode, {
+          'Content-Type': apiRes.headers['content-type'] || 'application/json',
+          'Access-Control-Allow-Origin': '*'
         });
+        apiRes.pipe(res);
+      });
 
-        apiReq.on('error', err => {
-          console.error('API Error:', err.message);
-          res.writeHead(500);
-          res.end(JSON.stringify({ error: err.message }));
-        });
+      apiReq.on('error', err => {
+        console.error('API Error:', err.message);
+        res.writeHead(500);
+        res.end(JSON.stringify({ error: err.message }));
+      });
 
-        apiReq.write(outBody);
-        apiReq.end();
-
-      } catch(e) {
-        console.error('Body parse error:', e.message);
-        res.writeHead(400);
-        res.end(JSON.stringify({ error: 'Invalid body' }));
-      }
+      apiReq.write(body);
+      apiReq.end();
     });
     return;
   }
