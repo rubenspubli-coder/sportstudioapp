@@ -30,12 +30,10 @@ const server = http.createServer((req, res) => {
         const messages = parsed.messages || [];
         const stream = parsed.stream || false;
 
-        // Converte formato Anthropic → Gemini
         const geminiContents = messages.map(m => {
           if (typeof m.content === 'string') {
             return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] };
           }
-          // Mensagem com imagens
           const parts = m.content.map(c => {
             if (c.type === 'text') return { text: c.text };
             if (c.type === 'image') return { inlineData: { mimeType: c.source.media_type, data: c.source.data } };
@@ -50,9 +48,10 @@ const server = http.createServer((req, res) => {
           generationConfig: { maxOutputTokens: 2500 }
         });
 
+        const MODEL = 'gemini-1.5-flash';
         const endpoint = stream
-          ? `/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${API_KEY}`
-          : `/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+          ? `/v1beta/models/${MODEL}:streamGenerateContent?alt=sse&key=${API_KEY}`
+          : `/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
         const options = {
           hostname: 'generativelanguage.googleapis.com',
@@ -65,7 +64,6 @@ const server = http.createServer((req, res) => {
           console.log('Gemini response status:', apiRes.statusCode);
 
           if (stream) {
-            // Converte SSE do Gemini → SSE formato Anthropic
             res.writeHead(200, {
               'Content-Type': 'text/event-stream',
               'Access-Control-Allow-Origin': '*'
@@ -97,11 +95,10 @@ const server = http.createServer((req, res) => {
             let responseBody = '';
             apiRes.on('data', chunk => responseBody += chunk);
             apiRes.on('end', () => {
-              console.log('Gemini response body:', responseBody);
+              console.log('Gemini response body:', responseBody.substring(0, 300));
               try {
                 const geminiData = JSON.parse(responseBody);
                 const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                // Converte para formato Anthropic
                 const anthropicFormat = JSON.stringify({ content: [{ type: 'text', text }] });
                 res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
                 res.end(anthropicFormat);
