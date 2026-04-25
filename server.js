@@ -28,7 +28,6 @@ const server = http.createServer((req, res) => {
         const parsed = JSON.parse(body);
         const systemPrompt = parsed.system || '';
         const messages = parsed.messages || [];
-        const stream = false; // Gemini: força modo não-streaming
 
         const geminiContents = messages.map(m => {
           if (typeof m.content === 'string') {
@@ -48,8 +47,8 @@ const server = http.createServer((req, res) => {
           generationConfig: { maxOutputTokens: 2500 }
         });
 
-        const MODEL = 'gemini-1.5-flash-001';
-        const endpoint = `/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+        const MODEL = 'gemini-1.5-flash';
+        const endpoint = `/v1/models/${MODEL}:generateContent?key=${API_KEY}`;
 
         console.log('Calling Gemini endpoint:', endpoint.substring(0, 60));
 
