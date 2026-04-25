@@ -4,10 +4,10 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 8080;
-const API_KEY = (process.env.OPENAI_API_KEY || '').trim();
+const API_KEY = (process.env.ANTHROPIC_API_KEY || '').trim();
 
-console.log('OPENAI API_KEY length:', API_KEY.length);
-console.log('OPENAI API_KEY starts with:', API_KEY.substring(0, 10));
+console.log('API_KEY length:', API_KEY.length);
+console.log('API_KEY starts with:', API_KEY.substring(0, 15));
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -26,102 +26,38 @@ const server = http.createServer((req, res) => {
 
       try {
         const parsed = JSON.parse(body);
-        const systemPrompt = parsed.system || '';
-        const messages = parsed.messages || [];
-        const stream = parsed.stream || false;
-
-        // Converte formato Anthropic → OpenAI
-        const openaiMessages = [];
-        if (systemPrompt) {
-          openaiMessages.push({ role: 'system', content: systemPrompt });
-        }
-        messages.forEach(m => {
-          if (typeof m.content === 'string') {
-            openaiMessages.push({ role: m.role, content: m.content });
-          } else {
-            // Mensagem com imagens
-            const parts = m.content.map(c => {
-              if (c.type === 'text') return { type: 'text', text: c.text };
-              if (c.type === 'image') return {
-                type: 'image_url',
-                image_url: { url: `data:${c.source.media_type};base64,${c.source.data}` }
-              };
-              return null;
-            }).filter(Boolean);
-            openaiMessages.push({ role: m.role, content: parts });
-          }
-        });
-
-        const openaiBody = JSON.stringify({
-          model: 'gpt-4o',
-          max_tokens: 2500,
-          stream: stream,
-          messages: openaiMessages
+        const outBody = JSON.stringify({
+          ...parsed,
+          model: 'claude-haiku-4-5-20251001'
         });
 
         const options = {
-          hostname: 'api.openai.com',
-          path: '/v1/chat/completions',
+          hostname: 'api.anthropic.com',
+          path: '/v1/messages',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`
+            'x-api-key': API_KEY,
+            'anthropic-version': '2023-06-01'
           }
         };
 
         const apiReq = https.request(options, apiRes => {
-          console.log('OpenAI response status:', apiRes.statusCode);
-
-          if (stream) {
-            res.writeHead(200, {
-              'Content-Type': 'text/event-stream',
-              'Access-Control-Allow-Origin': '*'
-            });
-            let buffer = '';
-            apiRes.on('data', chunk => {
-              buffer += chunk.toString();
-              const lines = buffer.split('\n');
-              buffer = lines.pop();
-              for (const line of lines) {
-                if (!line.startsWith('data: ')) continue;
-                const data = line.slice(6).trim();
-                if (data === '[DONE]') continue;
-                try {
-                  const evt = JSON.parse(data);
-                  const text = evt.choices?.[0]?.delta?.content || '';
-                  if (text) {
-                    const out = JSON.stringify({ type: 'content_block_delta', delta: { type: 'text_delta', text } });
-                    res.write(`data: ${out}\n\n`);
-                  }
-                } catch(e) {}
-              }
-            });
-            apiRes.on('end', () => { res.write('data: [DONE]\n\n'); res.end(); });
-          } else {
-            let responseBody = '';
-            apiRes.on('data', chunk => responseBody += chunk);
-            apiRes.on('end', () => {
-              console.log('OpenAI response:', responseBody.substring(0, 300));
-              try {
-                const openaiData = JSON.parse(responseBody);
-                const text = openaiData.choices?.[0]?.message?.content || '';
-                res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-                res.end(JSON.stringify({ content: [{ type: 'text', text }] }));
-              } catch(e) {
-                res.writeHead(500);
-                res.end(JSON.stringify({ error: 'Parse error' }));
-              }
-            });
-          }
+          console.log('API response status:', apiRes.statusCode);
+          res.writeHead(apiRes.statusCode, {
+            'Content-Type': apiRes.headers['content-type'] || 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          });
+          apiRes.pipe(res);
         });
 
         apiReq.on('error', err => {
-          console.error('OpenAI API Error:', err.message);
+          console.error('API Error:', err.message);
           res.writeHead(500);
           res.end(JSON.stringify({ error: err.message }));
         });
 
-        apiReq.write(openaiBody);
+        apiReq.write(outBody);
         apiReq.end();
 
       } catch(e) {
