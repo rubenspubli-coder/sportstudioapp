@@ -55,6 +55,7 @@ const server = http.createServer((req, res) => {
   // Serve HTML files
   const urlMap = {
     '/': 'index.html',
+    '/index.html': 'index.html',
     '/home': 'index.html',
     '/sports': 'sports.html',
     '/sports.html': 'sports.html',
