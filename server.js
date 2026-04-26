@@ -23,7 +23,6 @@ const server = http.createServer((req, res) => {
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
       console.log('POST /api received, body length:', body.length);
-
       const options = {
         hostname: 'api.anthropic.com',
         path: '/v1/messages',
@@ -34,36 +33,50 @@ const server = http.createServer((req, res) => {
           'anthropic-version': '2023-06-01'
         }
       };
-
       const apiReq = https.request(options, apiRes => {
         console.log('API response status:', apiRes.statusCode);
-        let responseBody = '';
-        apiRes.on('data', chunk => responseBody += chunk);
-        apiRes.on('end', () => {
-          console.log('API response body:', responseBody);
-        });
         res.writeHead(apiRes.statusCode, {
           'Content-Type': apiRes.headers['content-type'] || 'application/json',
           'Access-Control-Allow-Origin': '*'
         });
         apiRes.pipe(res);
       });
-
       apiReq.on('error', err => {
         console.error('API Error:', err.message);
         res.writeHead(500);
         res.end(JSON.stringify({ error: err.message }));
       });
-
       apiReq.write(body);
       apiReq.end();
     });
     return;
   }
 
-  const filePath = path.join(__dirname, 'index.html');
+  // Serve HTML files
+  const urlMap = {
+    '/': 'home.html',
+    '/home': 'home.html',
+    '/sports': 'sports.html',
+    '/sports.html': 'sports.html',
+    '/illusion': 'illusion.html',
+    '/illusion.html': 'illusion.html',
+    '/mascot': 'mascot.html',
+    '/mascot.html': 'mascot.html',
+  };
+
+  const fileName = urlMap[req.url] || 'home.html';
+  const filePath = path.join(__dirname, fileName);
+
   fs.readFile(filePath, (err, data) => {
-    if (err) { res.writeHead(404); res.end('Not found'); return; }
+    if (err) {
+      // Try home.html as fallback
+      fs.readFile(path.join(__dirname, 'home.html'), (err2, data2) => {
+        if (err2) { res.writeHead(404); res.end('Not found'); return; }
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(data2);
+      });
+      return;
+    }
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(data);
   });
