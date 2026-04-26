@@ -490,7 +490,7 @@ const SYSTEM_PROMPT = function(angle, proportion, description, hasImage) {
 
 let history = [], lastPrompts = [], initialized = false;
 let sessions = [];
-try { sessions = JSON.parse(localStorage.getItem('ss_sessions') || '[]'); } catch(e) {}
+try { sessions = JSON.parse(localStorage.getItem('is_sessions') || '[]'); } catch(e) {}
 let currentId = null, sbOpen = window.innerWidth >= 768;
 let pendingImages = [];
 let selectedAngle = null, selectedRatio = null;
@@ -542,7 +542,7 @@ function saveSession() {
   const sess = { id: currentId, name, date: new Date().toLocaleDateString('pt-BR'), history: JSON.parse(JSON.stringify(history)) };
   if (idx >= 0) sessions[idx] = sess; else sessions.unshift(sess);
   if (sessions.length > 20) sessions = sessions.slice(0,20);
-  try { localStorage.setItem('ss_sessions', JSON.stringify(sessions)); } catch(e) {}
+  try { localStorage.setItem('is_sessions', JSON.stringify(sessions)); } catch(e) {}
   renderHist();
 }
 
@@ -565,7 +565,7 @@ window.loadSess = function(id) {
 
 window.delSess = function(id) {
   sessions=sessions.filter(s=>s.id!==id);
-  try { localStorage.setItem('ss_sessions',JSON.stringify(sessions)); } catch(e) {}
+  try { localStorage.setItem('is_sessions',JSON.stringify(sessions)); } catch(e) {}
   if (currentId===id) newChat(); else renderHist();
 };
 
