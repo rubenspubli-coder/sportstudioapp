@@ -289,6 +289,10 @@ header {
   font-size: 12px; color: #555;
   font-style: italic; line-height: 1.55;
 }
+
+#home-btn { width:30px;height:30px;background:var(--s2);border:1px solid var(--border);border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;text-decoration:none; }
+#home-btn:hover { border-color:var(--gdim);background:#2e2a10; }
+#home-btn svg { width:15px;height:15px; }
 </style>
 </head>
 <body>
@@ -316,6 +320,9 @@ header {
     <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1.5" width="4.5" height="13" rx="1.5" fill="#555"></rect><rect x="8" y="3.5" width="7" height="1.8" rx=".9" fill="#555"></rect><rect x="8" y="7.1" width="7" height="1.8" rx=".9" fill="#555"></rect><rect x="8" y="10.7" width="7" height="1.8" rx=".9" fill="#555"></rect></svg>
   </button>
   <div class="status"><span style="font-family:&#39;Barlow Condensed&#39;,sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;color:#ffde21;background:transparent;border:1px solid #ffde21;border-radius:20px;padding:3px 10px;display:flex;align-items:center;gap:5px;"><div class="dot"></div>AI STUDIO</span></div>
+  <a href="home.html" id="home-btn" title="Home">
+    <svg viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2L14 6.5V14H10V10H6V14H2V6.5Z" stroke="#777" stroke-width="1.3" stroke-linejoin="round"/></svg>
+  </a>
   <button id="hbg-btn" title="Menu"><div></div><div></div><div></div></button>
 </header>
 
