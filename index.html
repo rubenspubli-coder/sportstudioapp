@@ -111,7 +111,7 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
 <body>
 
 <div class="hero-wrapper">
-  <video id="bg-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4" muted playsinline></video>
+  <video id="bg-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4" muted playsinline autoplay crossorigin="anonymous" preload="auto"></video>
 
   <div class="hero-content">
     <div class="blur-overlay"></div>
@@ -250,7 +250,8 @@ function fadeOut(cb) {
   fadeRAF = requestAnimationFrame(step);
 }
 
-video.addEventListener('canplay', () => { video.play(); fadeIn(); });
+video.addEventListener('canplay', () => { video.play().catch(()=>{}); fadeIn(); });
+video.load();
 
 video.addEventListener('timeupdate', function checkEnd() {
   if (video.duration && video.currentTime >= video.duration - 0.6) {
