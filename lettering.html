@@ -585,6 +585,12 @@ function mkPromptBlock(num, text) {
 }
 
 function fmt(text) {
+  // Lettering Studio: wrap entire response as a single copyable prompt block
+  if (!text.includes('**Prompt') && !text.includes('%%PROMPT_')) {
+    const safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const dataP = text.replace(/"/g,'&quot;');
+    return '<div class="pb-wrap"><div class="pb-label">Prompt Gerado</div><pre>' + safe + '</pre><button class="cb" data-p="' + dataP + '">copiar</button></div>';
+  }
   let processed = text;
   processed = processed.replace(/\*\*Prompt\s*(\d+)[:\.]?\*\*\s*\n?/gi, '%%PROMPT_$1%%\n');
   const lines = processed.split('\n');
