@@ -54,15 +54,16 @@ const server = http.createServer((req, res) => {
 
   // Serve HTML files
   const urlMap = {
-    '/': 'index.html',
-    '/index.html': 'index.html',
-    '/home': 'index.html',
+    '/': 'home.html',
+    '/home': 'home.html',
     '/sports': 'sports.html',
     '/sports.html': 'sports.html',
     '/illusion': 'illusion.html',
     '/illusion.html': 'illusion.html',
     '/mascot': 'mascot.html',
     '/mascot.html': 'mascot.html',
+    '/lettering': 'lettering.html',
+    '/lettering.html': 'lettering.html',
   };
 
   const fileName = urlMap[req.url] || 'home.html';
@@ -83,4 +84,4 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

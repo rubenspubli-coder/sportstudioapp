@@ -16,6 +16,7 @@
   --sports: #39ff14;
   --illusion: #dc036b;
   --mascot: #ffde21;
+  --lettering: #0090ff;
 }
 html, body { min-height: 100%; background: var(--bg); color: var(--fg); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
 
@@ -87,6 +88,12 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
 .card-sports:hover .card-cta { background: var(--sports); color: #000; }
 .card-illusion:hover .card-cta { background: var(--illusion); color: #fff; }
 .card-mascot:hover .card-cta { background: var(--mascot); color: #000; }
+.card-lettering::after { background: radial-gradient(circle at 50% 0%, rgba(0,144,255,0.09) 0%, transparent 65%); }
+.card-lettering:hover { box-shadow: 0 24px 60px rgba(0,144,255,0.1); }
+.card-lettering .card-icon { background: rgba(0,144,255,0.08); }
+.card-lettering .card-title span { color: var(--lettering); }
+.card-lettering .card-cta { color: var(--lettering); background: rgba(0,144,255,0.07); }
+.card-lettering:hover .card-cta { background: var(--lettering); color: #fff; }
 
 .marquee-section { position: relative; z-index: 20; padding: 0 32px; display: flex; align-items: center; gap: 40px; max-width: 1000px; margin: 36px auto 0; width: 100%; }
 .marquee-label { font-size: 11px; color: rgba(255,255,255,0.25); line-height: 1.6; white-space: nowrap; flex-shrink: 0; }
@@ -185,6 +192,20 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
           </div>
           <div class="card-title">MASCOT<span>STUDIO</span></div>
           <div class="card-desc">Mascotes 3D estilizados com proporções iGen e estética candy tone.</div>
+          <div class="card-cta">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Acessar
+          </div>
+        </a>
+
+        <a href="lettering.html" class="studio-card card-lettering">
+          <div class="card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M4 20L7.5 4H9.5L13 14L15 8H17L20 20H18.5L17.2 15H14.8L13.5 20H11.5L9.5 13L7.5 20H4Z" fill="#0090ff" opacity="0.9"/>
+            </svg>
+          </div>
+          <div class="card-title">LETTERING<span>STUDIO</span></div>
+          <div class="card-desc">Prompts 3D para lettering e tipografia estilizada com renderização cinematográfica.</div>
           <div class="card-cta">
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Acessar
