@@ -223,6 +223,7 @@ header {
   background-size: 24px 24px;
   display: flex; align-items: center; justify-content: center;
   font-family: 'DM Sans', sans-serif;
+  overflow: hidden;
 }
 #login-box {
   background: #111;
@@ -284,6 +285,15 @@ header {
 #login-back { position:fixed; top:24px; left:24px; z-index:1000; width:34px; height:34px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:8px; display:none; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; transition:all .2s; }
 #login-back:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); }
 #login-back svg { width:16px; height:16px; }
+
+#login-video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+}
 </style>
 </head>
 <body>
@@ -292,7 +302,8 @@ header {
     <svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
 <div id="login-overlay">
-  <div id="login-box">
+  <video id="login-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_115655_b4d9cd77-feed-43cd-a198-af78ebdf1f7a.mp4" muted playsinline autoplay crossorigin="anonymous" preload="auto"></video>
+  <div id="login-box" style="position:relative;z-index:1;">
 
     <div id="login-title">ILLUSION<span>STUDIO</span></div>
     <div id="login-sub">Onde a mágica acontece</div>
@@ -999,4 +1010,62 @@ document.addEventListener('contextmenu', e => e.preventDefault());
 
 
 
+<script>
+
+// Login video fade loop
+(function() {
+  var lv = document.getElementById('login-video');
+  if (!lv) return;
+  var lvRAF;
+
+  function lvFadeIn() {
+    cancelAnimationFrame(lvRAF);
+    var start = performance.now();
+    function step(now) {
+      var t = Math.min((now - start) / 500, 1);
+      lv.style.opacity = t * 0.5;
+      if (t < 1) lvRAF = requestAnimationFrame(step);
+    }
+    lvRAF = requestAnimationFrame(step);
+  }
+
+  function lvFadeOut(cb) {
+    cancelAnimationFrame(lvRAF);
+    var start = performance.now();
+    var from = parseFloat(lv.style.opacity) || 0.5;
+    function step(now) {
+      var t = Math.min((now - start) / 500, 1);
+      lv.style.opacity = from * (1 - t);
+      if (t < 1) lvRAF = requestAnimationFrame(step);
+      else cb && cb();
+    }
+    lvRAF = requestAnimationFrame(step);
+  }
+
+  lv.addEventListener('canplay', function() { lv.play().catch(function(){}); lvFadeIn(); });
+
+  lv.addEventListener('timeupdate', function checkEnd() {
+    if (lv.duration && lv.currentTime >= lv.duration - 0.6) {
+      lv.removeEventListener('timeupdate', checkEnd);
+      lvFadeOut(function() {
+        lv.style.opacity = 0;
+        setTimeout(function() {
+          lv.currentTime = 0;
+          lv.play().catch(function(){});
+          lvFadeIn();
+          lv.addEventListener('timeupdate', checkEnd);
+        }, 100);
+      });
+    }
+  });
+
+  lv.addEventListener('ended', function() {
+    lv.style.opacity = 0;
+    setTimeout(function() { lv.currentTime = 0; lv.play().catch(function(){}); lvFadeIn(); }, 100);
+  });
+
+  lv.load();
+})();
+
+</script>
 </body></html>
