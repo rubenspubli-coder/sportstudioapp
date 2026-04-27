@@ -294,7 +294,7 @@ header {
 #home-btn:hover { border-color:var(--gdim);background:#1a2e18; }
 #home-btn svg { width:15px;height:15px; }
 
-#login-back { position:absolute; top:16px; left:16px; width:34px; height:34px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; transition:all .2s; }
+#login-back { width:34px; height:34px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; transition:all .2s; margin-bottom:20px; flex-shrink:0; }
 #login-back:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); }
 #login-back svg { width:16px; height:16px; }
 </style>
@@ -302,7 +302,7 @@ header {
 <body>
 
 <div id="login-overlay">
-  <div id="login-box" style="position:relative;">
+  <div id="login-box">
   <a href="index.html" id="login-back" title="Voltar">
     <svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
