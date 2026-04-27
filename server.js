@@ -52,10 +52,10 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Serve HTML files
   const urlMap = {
-    '/': 'home.html',
-    '/home': 'home.html',
+    '/': 'index.html',
+    '/index.html': 'index.html',
+    '/home': 'index.html',
     '/sports': 'sports.html',
     '/sports.html': 'sports.html',
     '/illusion': 'illusion.html',
@@ -66,13 +66,12 @@ const server = http.createServer((req, res) => {
     '/lettering.html': 'lettering.html',
   };
 
-  const fileName = urlMap[req.url] || 'home.html';
+  const fileName = urlMap[req.url] || 'index.html';
   const filePath = path.join(__dirname, fileName);
 
   fs.readFile(filePath, (err, data) => {
     if (err) {
-      // Try home.html as fallback
-      fs.readFile(path.join(__dirname, 'home.html'), (err2, data2) => {
+      fs.readFile(path.join(__dirname, 'index.html'), (err2, data2) => {
         if (err2) { res.writeHead(404); res.end('Not found'); return; }
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(data2);
