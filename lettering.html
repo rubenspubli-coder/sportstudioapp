@@ -280,7 +280,7 @@ header {
 }
 
 
-#login-back { position:fixed; top:24px; left:24px; z-index:1000; width:34px; height:34px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; transition:all .2s; }
+#login-back { position:fixed; top:24px; left:24px; z-index:1000; width:34px; height:34px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:8px; display:none; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; transition:all .2s; }
 #login-back:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); }
 #login-back svg { width:16px; height:16px; }
 </style>
@@ -964,6 +964,7 @@ document.addEventListener('contextmenu', e => e.preventDefault());
   function tryLogin() {
     if (input.value.trim().toLowerCase() === 'pablo') {
       overlay.style.display = 'none';
+      document.getElementById('login-back').style.display = 'none';
       // Inicializa o app SOMENTE após login correto
       currentId = Date.now().toString();
       renderHist();
@@ -981,6 +982,7 @@ document.addEventListener('contextmenu', e => e.preventDefault());
     if (e.key === 'Enter') tryLogin();
   });
   input.focus();
+  document.getElementById('login-back').style.display = 'flex';
 })();
 </script>
 
