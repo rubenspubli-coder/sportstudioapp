@@ -229,13 +229,32 @@ header {
   overflow: hidden;
 }
 #login-box {
-  background: #111;
-  border: 1px solid #2a2a2a;
-  border-radius: 16px;
+  position: relative;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 20px;
   padding: 48px 40px 36px;
   width: 100%; max-width: 440px;
   margin: 20px;
   display: flex; flex-direction: column; gap: 0;
+  overflow: hidden;
+}
+#login-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(160deg,
+    rgba(255,255,255,0.25) 0%,
+    rgba(255,255,255,0.06) 40%,
+    rgba(255,255,255,0.06) 60%,
+    rgba(255,255,255,0.25) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 #login-title {
   font-family: 'Barlow Condensed', sans-serif;
