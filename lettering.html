@@ -573,7 +573,7 @@ function addMsg(role, content, typing=false, imgUrl=null) {
   if (typing) { mc.innerHTML='<div class="ty"><span></span><span></span><span></span></div>'; }
   else {
     if (imgUrl) { const img=document.createElement('img'); img.src=imgUrl; img.className='mi'; mc.appendChild(img); }
-    const td=document.createElement('div'); td.innerHTML=fmt(content); mc.appendChild(td);
+    const td=document.createElement('div'); td.innerHTML=fmt(content, role); mc.appendChild(td);
   }
   d.appendChild(av); d.appendChild(mc); chat.appendChild(d); scrollB(); return d;
 }
@@ -584,9 +584,9 @@ function mkPromptBlock(num, text) {
   return `<div class="pb-wrap"><div class="pb-label">Prompt ${num}</div><pre>${safe}</pre><button class="cb" data-p="${dataP}">copiar</button></div>`;
 }
 
-function fmt(text) {
-  // Lettering Studio: wrap entire response as a single copyable prompt block
-  if (!text.includes('**Prompt') && !text.includes('%%PROMPT_')) {
+function fmt(text, role) {
+  // Lettering Studio: only wrap bot responses as copyable prompt block
+  if (role === 'bot' && !text.includes('**Prompt') && !text.includes('%%PROMPT_')) {
     const safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const dataP = text.replace(/"/g,'&quot;');
     return '<div class="pb-wrap"><div class="pb-label">Prompt Gerado</div><pre>' + safe + '</pre><button class="cb" data-p="' + dataP + '">copiar</button></div>';
@@ -916,7 +916,7 @@ async function send(ov) {
         try { const evt=JSON.parse(data); if (evt.type==='content_block_delta' && evt.delta?.type==='text_delta') { fullReply+=evt.delta.text; td.innerHTML=fmtStream(fullReply); scrollB(); } } catch(e) {}
       }
     }
-    td.innerHTML=fmt(fullReply);
+    td.innerHTML=fmt(fullReply, 'bot');
     history.push({role:'assistant',content:fullReply});
     saveSession();
   } catch(err) {
