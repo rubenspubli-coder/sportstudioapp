@@ -64,6 +64,8 @@ const server = http.createServer((req, res) => {
     '/mascot.html': 'mascot.html',
     '/lettering': 'lettering.html',
     '/lettering.html': 'lettering.html',
+    '/liveaction': 'liveaction.html',
+    '/liveaction.html': 'liveaction.html',
   };
 
   const fileName = urlMap[req.url] || 'index.html';
