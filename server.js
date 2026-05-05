@@ -66,6 +66,8 @@ const server = http.createServer((req, res) => {
     '/lettering.html': 'lettering.html',
     '/liveaction': 'liveaction.html',
     '/liveaction.html': 'liveaction.html',
+    '/extraidor': 'extraidor.html',
+    '/extraidor.html': 'extraidor.html',
   };
 
   const fileName = urlMap[req.url] || 'index.html';
