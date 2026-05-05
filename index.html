@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SS Studio Hub</title>
+<title>Cinematic AI Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
@@ -26,13 +26,13 @@
   --lettering: #0090ff;
   --liveaction: #BA3232;
 }
-html, body { min-height: 100%; background: var(--bg); color: var(--fg); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+html { min-height: 100%; background: var(--bg); color: var(--fg); font-family: 'DM Sans', sans-serif; } body { min-height: 100%; background: var(--bg); color: var(--fg); font-family: 'DM Sans', sans-serif; overflow-x: visible; }
 
-.hero-wrapper { position: relative; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+.hero-wrapper { position: relative; min-height: 100vh; display: flex; flex-direction: column; }
 
 #bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; z-index: 0; pointer-events: none; }
 
-.hero-content { position: relative; z-index: 10; display: flex; flex-direction: column; min-height: 100vh; overflow-y: auto; }
+.hero-content { position: relative; z-index: 10; display: flex; flex-direction: column; min-height: 100vh; }
 
 .blur-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 984px; height: 527px; background: rgba(3,1,12,0.88); filter: blur(82px); pointer-events: none; z-index: 1; }
 
@@ -49,14 +49,14 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
 
 .nav-divider { height: 1px; background: linear-gradient(to right, transparent, rgba(255,255,255,0.12), transparent); position: relative; z-index: 20; }
 
-.hero-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 24px 20px; position: relative; z-index: 10; overflow: visible; }
+.hero-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 48px 20px; position: relative; z-index: 10; overflow: visible; }
 
 .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px; border-radius: 100px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 28px; }
 .hero-badge .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--sports); animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-.hero-headline { font-family: 'General Sans', sans-serif; font-size: clamp(48px, 9vw, 108px); font-weight: 600; line-height: 1.0; letter-spacing: -0.024em; color: var(--fg); margin-bottom: 18px; }
-.gradient-text { background: linear-gradient(to left, #6366f1, #a855f7, #fcd34d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-headline { font-family: 'Allotrope', 'General Sans', sans-serif; font-size: clamp(48px, 9vw, 108px); font-weight: 900; font-style: italic; line-height: 1.0; letter-spacing: -0.01em; color: var(--fg); margin-bottom: 18px; padding: 0.1em 0.35em 0.1em 0.4em; overflow: visible; display: block; width: fit-content; }
+.gradient-text { background: linear-gradient(to left, #6366f1, #a855f7, #fcd34d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; padding-left: 0.3em; margin-left: -0.3em; display: inline-block; }
 
 .hero-sub { font-size: clamp(13px, 1.8vw, 16px); color: var(--fg-sub); opacity: 0.75; max-width: 380px; line-height: 1.7; margin-bottom: 44px; }
 
@@ -190,7 +190,7 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
   .studio-card { max-width: 100%; width: 100%; min-width: unset; }
   .marquee-section { flex-direction: column; gap: 12px; }
   .marquee-label { text-align: center; }
-  .hero-wrapper, body { overflow-x: hidden; }
+
 }
 @media (min-width: 701px) {
   .nav-mobile { display: none; }
