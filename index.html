@@ -213,7 +213,7 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
 
     <nav>
       <div class="nav-logo"></div>
-      <div class="nav-links">
+      <div class="nav-links" id="nav-links">
         <a href="sports.html">Sports</a>
         <a href="illusion.html">Illusion</a>
         <a href="mascot.html">Mascot</a>
@@ -221,7 +221,7 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
         <a href="liveaction.html">Live Action</a>
         <a href="extraidor.html">Extrator</a>
       </div>
-      <div class="nav-by">by Rubens Macedo</div>
+      <div class="nav-by">by Rubens Macedo &nbsp;·&nbsp; <a href="admin.html" id="admin-link" style="color:rgba(255,255,255,0.35);text-decoration:none;font-size:10px;letter-spacing:.04em;transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">Admin</a></div>
     </nav>
     <div class="nav-mobile">
       <div class="nav-mobile-links">
@@ -242,11 +242,11 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
         Creative AI Studio Platform
       </div>
 
-      <h1 class="hero-headline">
+      <h1 class="hero-headline" id="hero-headline">
         Cinematic<br><span class="gradient-text">AI Studio</span>
       </h1>
 
-      <p class="hero-sub">Agentes inteligentes que automatizam processos<br>e elevam o padrão profissional e performance do criativo/campanha.</p>
+      <p class="hero-sub" id="hero-sub">Agentes inteligentes que automatizam processos<br>e elevam o padrão profissional e performance do criativo/campanha.</p>
 
       <div class="studios">
 
@@ -340,7 +340,7 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
     <div class="marquee-section">
       <div class="marquee-label">Powered by<br>AI models</div>
       <div class="marquee-track">
-        <div class="marquee-inner">
+        <div class="marquee-inner" id="marquee-inner">
           <div class="marquee-item"><div class="marquee-icon">A</div><span class="marquee-name">Anthropic</span></div>
           <div class="marquee-item"><div class="marquee-icon">C</div><span class="marquee-name">Claude</span></div>
           <div class="marquee-item"><div class="marquee-icon">U</div><span class="marquee-name">Unreal 5</span></div>
@@ -361,7 +361,7 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
       </div>
     </div>
 
-    <div class="footer">Desenvolvido por Rubens Macedo — @pixelperfect.macedo</div>
+    <div class="footer" id="footer">Desenvolvido por Rubens Macedo — @pixelperfect.macedo</div>
   </div>
 </div>
 
@@ -413,5 +413,53 @@ video.addEventListener('ended', () => {
 
 document.addEventListener('contextmenu', e => e.preventDefault());
 </script>
+
+<script>
+// ── Carregar configuração do servidor ────────────────────────────────────────
+(async function() {
+  try {
+    var r = await fetch('/config.json');
+    if (!r.ok) return;
+    var cfg = await r.json();
+
+    if (cfg.headline) {
+      var h1 = document.getElementById('hero-headline');
+      if (h1) h1.innerHTML = cfg.headline;
+    }
+    if (cfg.subheadline) {
+      var sub = document.getElementById('hero-sub');
+      if (sub) sub.innerHTML = cfg.subheadline;
+    }
+    if (cfg.videoUrl) {
+      var vid = document.getElementById('bg-video');
+      if (vid) { vid.src = cfg.videoUrl; vid.load(); }
+    }
+    if (Array.isArray(cfg.navLinks) && cfg.navLinks.length) {
+      [document.getElementById('nav-links'), document.querySelector('.nav-mobile-links')].forEach(function(nl) {
+        if (!nl) return;
+        nl.innerHTML = '';
+        cfg.navLinks.forEach(function(item) {
+          if (!item.label || !item.url) return;
+          var a = document.createElement('a');
+          a.href = item.url; a.textContent = item.label;
+          nl.appendChild(a);
+        });
+      });
+    }
+    if (Array.isArray(cfg.tickerItems) && cfg.tickerItems.length) {
+      var mi = document.getElementById('marquee-inner');
+      if (mi) {
+        var doubled = cfg.tickerItems.concat(cfg.tickerItems);
+        mi.innerHTML = doubled.map(function(item) {
+          return '<div class="marquee-item"><div class="marquee-icon">' +
+            (item.icon || item.label.charAt(0).toUpperCase()) +
+            '</div><span class="marquee-name">' + item.label + '</span></div>';
+        }).join('');
+      }
+    }
+  } catch(e) { console.warn('Config load error:', e); }
+})();
+</script>
+
 </body>
 </html>
