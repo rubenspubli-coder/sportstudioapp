@@ -237,80 +237,6 @@ header {
   .menu-btn-row { flex-direction: column; }
 }
 
-#login-overlay {
-  position: fixed; inset: 0; z-index: 999;
-  background-color: #0a0a0a;
-  background-image: radial-gradient(circle, #2a2a2a 1px, transparent 1px);
-  background-size: 24px 24px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'DM Sans', sans-serif;
-  overflow: hidden;
-}
-#login-box {
-  position: relative;
-  background: rgba(255,255,255,0.04);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-radius: 20px;
-  padding: 48px 40px 36px;
-  width: 100%; max-width: 440px;
-  margin: 20px;
-  display: flex; flex-direction: column; gap: 0;
-  overflow: hidden;
-}
-#login-box::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  padding: 1px;
-  background: linear-gradient(160deg,
-    rgba(255,255,255,0.25) 0%,
-    rgba(255,255,255,0.06) 40%,
-    rgba(255,255,255,0.06) 60%,
-    rgba(255,255,255,0.25) 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-#login-title {
-  font-family: 'Allotrope', 'Barlow Condensed', sans-serif;
-  font-size: clamp(22px, 7vw, 32px); font-weight: 800;
-  text-transform: uppercase; letter-spacing: .06em;
-  color: #f0f0f0; margin-bottom: 6px;
-}
-#login-title span { color: #d55715; }
-#login-sub {
-  font-size: 11px; font-weight: 600; color: #555;
-  text-transform: uppercase; letter-spacing: .15em;
-  margin-bottom: 36px;
-}
-#login-label {
-  font-size: 11px; font-weight: 600; color: #666;
-  text-transform: uppercase; letter-spacing: .12em;
-  margin-bottom: 10px;
-}
-#login-input {
-  width: 100%; background: #1a1a1a;
-  border: 1.5px solid #d55715;
-  border-radius: 8px; padding: 14px 16px;
-  font-size: 15px; color: #f0f0f0;
-  font-family: 'DM Sans', sans-serif;
-  outline: none; margin-bottom: 16px;
-}
-#login-input::placeholder { color: #333; }
-#login-btn {
-  width: 100%; background: #d55715;
-  border: none; border-radius: 8px;
-  padding: 16px; font-family: 'Barlow Condensed', sans-serif;
-  font-size: 18px; font-weight: 800;
-  letter-spacing: .1em; text-transform: uppercase;
-  color: #fff; cursor: pointer;
-  box-shadow: 0 0 0px transparent;
-  transition: background .3s, box-shadow .5s ease;
-}
-#login-btn:hover { background: #e06820; box-shadow: 0 0 8px rgba(213,87,21,0.5), 0 0 20px rgba(213,87,21,0.2); }
 #login-error {
   font-size: 12px; color: #ff4444;
   text-align: center; margin-top: 10px;
@@ -325,15 +251,6 @@ header {
 #login-back { position:fixed; top:24px; left:24px; z-index:1000; width:34px; height:34px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:8px; display:none; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; transition:all .2s; }
 #login-back:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); }
 #login-back svg { width:16px; height:16px; }
-
-#login-video {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  z-index: 0;
-  pointer-events: none;
-}
 
 /* ═══ LIQUID GLASS NEON INPUT BAR ═══ */
 .glass-bar-wrap {
@@ -466,28 +383,11 @@ header {
 <a href="index.html" id="login-back" title="Voltar">
     <svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
-<div id="login-overlay">
-  <video id="login-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_115655_b4d9cd77-feed-43cd-a198-af78ebdf1f7a.mp4" muted playsinline autoplay crossorigin="anonymous" preload="auto"></video>
-  <div id="login-box" style="position:relative;z-index:1;">
 
-    <div id="login-title">EXTRATOR <span>DE PROMPT</span></div>
-    <div id="login-sub">Extraia prompts detalhados de qualquer imagem</div>
-    <div id="login-label">Senha de acesso</div>
-    <input id="login-input" type="password" placeholder="••••••••" autocomplete="off">
-    <button id="login-btn">Entrar</button>
-    <div id="login-error"></div>
-    <p style="font-size:10px;color:#444;text-align:center;margin-top:16px;letter-spacing:.03em;">Desenvolvido por Rubens Macedo — @pixelperfect.macedo</p>
-  </div>
-</div>
 
 
 <header>
-  <div style="display:flex;align-items:center;height:54px;gap:8px;">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="11" cy="8" r="5" fill="#d55715" opacity="0.95"/>
-      <circle cx="11" cy="8" r="2.5" fill="#fff" opacity="0.3"/>
-      <path d="M3 20c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="#d55715" stroke-width="2" stroke-linecap="round" opacity="0.95"/>
-    </svg>
+  <div style="display:flex;align-items:center;height:54px;">
     <span style="font-family:'Allotrope','Barlow Condensed',sans-serif;font-size:22px;font-weight:900;font-style:italic;letter-spacing:.06em;text-transform:uppercase;color:#f0f0f0;line-height:1;">EXTRATOR <span style="color:#d55715;">DE PROMPT</span></span>
   </div>
   <button id="toggle-sb" title="Histórico">
@@ -789,45 +689,61 @@ function mkPromptBlock(num, text) {
 }
 
 function fmt(text) {
-  let processed = text;
-  processed = processed.replace(/\*\*Prompt\s*(\d+)[:\.]?\*\*\s*\n?/gi, '%%PROMPT_$1%%\n');
-  const lines = processed.split('\n');
-  let html='', prompts=[], inP=false, pNum=0, promptLines=[];
-  for (let i=0; i<lines.length; i++) {
-    const line=lines[i];
-    const pmMatch=line.match(/^%%PROMPT_(\d+)%%/);
-    const cq=line.includes('Qual prompt você escolhe?');
-    if (pmMatch) {
-      if (inP && promptLines.length) { const t=promptLines.join(' ').trim(); prompts.push({num:pNum,text:t}); html+=mkPromptBlock(pNum,t); }
-      pNum=parseInt(pmMatch[1]); inP=true; promptLines=[]; continue;
+  // Processar blocos de código fenced (```lang ... ```)
+  let html = '';
+  const segments = text.split(/(```[\s\S]*?```)/g);
+  for (let seg of segments) {
+    if (seg.startsWith('```')) {
+      // Extrair linguagem e conteúdo
+      const firstLine = seg.indexOf('\n');
+      const lang = firstLine > 0 ? seg.slice(3, firstLine).trim() : '';
+      const code = firstLine > 0 ? seg.slice(firstLine+1, -3).trim() : seg.slice(3,-3).trim();
+      const label = lang === 'prompt' ? 'PROMPT' : lang === 'negative' ? 'NEGATIVE PROMPT' : lang.toUpperCase() || 'CÓDIGO';
+      const escaped = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      html += `<div class="pb-wrap">
+        <div class="pb-label">${label}</div>
+        <pre>${escaped}<button class="cb" title="Copiar" onclick="navigator.clipboard.writeText(this.previousSibling?.textContent||this.closest('.pb-wrap').querySelector('pre').innerText).then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='copiar',1500)})">copiar</button></pre>
+      </div>`;
+    } else if (seg.trim()) {
+      // Processar markdown normal
+      const lines = seg.split('\n');
+      for (const line of lines) {
+        const t = line
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g,'<em>$1</em>');
+        if (line.startsWith('## ')) {
+          html += `<h3 style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:16px 0 6px;border-bottom:1px solid var(--gdim);padding-bottom:4px;">${t.replace(/^## /,'')}</h3>`;
+        } else if (line.startsWith('# ')) {
+          html += `<h2 style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:20px 0 8px;">${t.replace(/^# /,'')}</h2>`;
+        } else if (line.startsWith('- ') || line.startsWith('* ')) {
+          html += `<p style="margin-left:12px;">• ${t.slice(2)}</p>`;
+        } else if (line.startsWith('**') && line.endsWith('**')) {
+          html += `<p><strong>${t.replace(/^\*\*/,'').replace(/\*\*$/,'')}</strong></p>`;
+        } else if (line.trim()) {
+          html += `<p>${t}</p>`;
+        } else {
+          html += '<br>';
+        }
+      }
     }
-    if (inP) {
-      if (cq) {
-        if (promptLines.length) { const t=promptLines.join(' ').trim(); prompts.push({num:pNum,text:t}); html+=mkPromptBlock(pNum,t); promptLines=[]; }
-        inP=false;
-      } else if (line.trim()) { promptLines.push(line.trim()); continue; }
-      else { if (promptLines.length) { const t=promptLines.join(' ').trim(); prompts.push({num:pNum,text:t}); html+=mkPromptBlock(pNum,t); promptLines=[]; inP=false; } continue; }
-    }
-    if (cq && prompts.length>0) {
-      lastPrompts=[...prompts];
-      html+=`<p style="margin-top:12px;color:var(--muted);font-size:12px;">${line}</p>`;
-      html+=`<div class="pc">${lastPrompts.map(p=>`<button class="pb" onclick="pick(${p.num})">Prompt ${p.num}</button>`).join('')}</div>`;
-      prompts=[]; continue;
-    }
-    if (line.trim()) html+=`<p>${line.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</p>`;
   }
-  if (inP && promptLines.length) { const t=promptLines.join(' ').trim(); prompts.push({num:pNum,text:t}); html+=mkPromptBlock(pNum,t); }
-  if (prompts.length>0) {
-    lastPrompts=[...prompts];
-    html+=`<p style="margin-top:12px;color:var(--muted);font-size:12px;">Qual prompt você escolhe? 1, 2 ou 3?</p>`;
-    html+=`<div class="pc">${lastPrompts.map(p=>`<button class="pb" onclick="pick(${p.num})">Prompt ${p.num}</button>`).join('')}</div>`;
-  }
-  return html || `<p>${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`;
+  return html || `<p>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`;
 }
 
+
 function fmtStream(text) {
-  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').split('\n').join('<br>');
+  // Durante streaming: renderizar markdown básico sem processar blocos incompletos
+  let safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  safe = safe
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^## (.+)$/gm,'<strong style="color:var(--green)">$1</strong>')
+    .replace(/^# (.+)$/gm,'<strong style="color:var(--green);font-size:1.1em">$1</strong>')
+    .replace(/```[a-z]*/g,'<code style="color:var(--gdim)">')
+    .replace(/```/g,'</code>');
+  return safe.split('\n').join('<br>');
 }
+
 
 // COPY
 document.addEventListener('click', function(e) {
@@ -856,7 +772,7 @@ window.pick = function(n) {
 };
 
 // IMAGES
-const MAX_IMGS=5;
+const MAX_IMGS=8;
 function updateImgUI() {
   const strip=document.getElementById('img-previews');
   const badge=document.getElementById('img-count-badge');
@@ -915,7 +831,7 @@ function addImages(files) {
 }
 
 document.getElementById('fi').addEventListener('change', e=>{ if (e.target.files.length) { addImages(e.target.files); e.target.value=''; } });
-document.addEventListener('paste', e=>{ const items=e.clipboardData?.items; if (!items) return; for (const item of items) { if (item.type.startsWith('image/')) { const f=item.getAsFile(); if (f) { addImages([f]); e.preventDefault(); break; } } } });
+document.addEventListener('paste', e=>{ const items=e.clipboardData?.items; if (!items) return; for (const item of items) { if (item.type.startsWith('image/')) { const f=item.getAsFile(); if (f) { addImages([f]); e.preventDefault(); } } } });
 
 // ANGLES
 function toggleAngles() {
