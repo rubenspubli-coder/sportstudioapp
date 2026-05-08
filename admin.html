@@ -57,6 +57,16 @@
   .vr button:hover{background:rgba(255,255,255,.1)}
   .pw2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .pw2 input{margin-bottom:0}
+  .fav-area{display:flex;align-items:center;gap:20px;margin-bottom:16px}
+  .fav-preview{width:64px;height:64px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+  .fav-preview img{width:48px;height:48px;object-fit:contain;display:none}
+  .fav-preview span{font-size:22px;color:var(--muted)}
+  .fav-drop{flex:1;border:1.5px dashed var(--border2);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+  .fav-drop:hover{border-color:var(--accent);background:rgba(124,58,237,.05)}
+  .fav-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .fav-drop p{font-size:13px;color:var(--muted);margin:0;pointer-events:none}
+  .fav-drop p strong{color:var(--fg);display:block;margin-bottom:4px}
+  .fav-fname{font-size:11px;color:var(--accent2);margin-top:8px;display:none}
   .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
   @keyframes spin{to{transform:rotate(360deg)}}
   .toast{position:fixed;bottom:28px;right:28px;z-index:9999;background:var(--success);color:#fff;border-radius:12px;padding:14px 22px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.22,1,.36,1);pointer-events:none}
@@ -141,6 +151,23 @@
       <button class="sb" onclick="save('videoLogin')">Salvar Vídeo do Login</button>
     </div>
 
+    <div class="st">Favicon do Site</div>
+    <div class="card">
+      <label>Ícone do site (PNG, ICO, SVG — recomendado 64×64 ou 32×32)</label>
+      <div class="fav-area">
+        <div class="fav-preview" id="fav-preview">
+          <img id="fav-img" src="" alt="favicon">
+          <span id="fav-placeholder">🌐</span>
+        </div>
+        <div class="fav-drop" id="fav-drop">
+          <input type="file" id="fav-file" accept="image/png,image/x-icon,image/svg+xml,image/jpeg,image/gif" onchange="onFavSelect(this)">
+          <p><strong>Clique ou arraste o arquivo aqui</strong>PNG, ICO ou SVG · máx. 512 KB</p>
+          <div class="fav-fname" id="fav-fname"></div>
+        </div>
+      </div>
+      <button class="sb" onclick="saveFavicon()">Salvar Favicon</button>
+    </div>
+
     <div class="st">Segurança</div>
     <div class="card">
       <label>Alterar senha</label>
@@ -206,7 +233,15 @@ async function loadCfg(){
     renderNav(nl);
     var ti=Array.isArray(c.tickerItems)?c.tickerItems:[{icon:'A',label:'Anthropic'},{icon:'C',label:'Claude'},{icon:'U',label:'Unreal 5'},{icon:'P',label:'RenderMan'},{icon:'D',label:'DreamWorks'},{icon:'M',label:'MoonRay'},{icon:'S',label:'Stable Diffusion'},{icon:'R',label:'Railway'}];
     renderTick(ti);
+    if(c.faviconBase64)loadFaviconPreview(c.faviconBase64);
   }catch(e){toast('Erro ao carregar: '+e.message,'err');}
+}
+
+function loadFaviconPreview(b64){
+  if(!b64)return;
+  var img=document.getElementById('fav-img');
+  var ph=document.getElementById('fav-placeholder');
+  img.src=b64;img.style.display='block';ph.style.display='none';
 }
 
 async function save(sec){
@@ -290,6 +325,30 @@ function toast(msg,type){
   setTimeout(function(){t.classList.remove('show');},6000);
 }
 
+function onFavSelect(input){
+  var file=input.files[0];if(!file)return;
+  if(file.size>512*1024){toast('Arquivo muito grande. Máximo 512 KB.','err');input.value='';return;}
+  var fn=document.getElementById('fav-fname');
+  fn.textContent=file.name;fn.style.display='block';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    window._favB64=e.target.result;
+    loadFaviconPreview(e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveFavicon(){
+  if(!window._favB64)return toast('Selecione um arquivo primeiro.','err');
+  try{
+    var r=await fetch('/admin/config',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({faviconBase64:window._favB64})});
+    if(r.status===401){doLogout();return;}
+    var d=await r.json();
+    if(!d.ok)throw new Error(d.error||'Erro');
+    toast('✓ Favicon salvo! Recarregue o site para ver.');
+  }catch(e){toast(e.message,'err');}
+}
+
 // Boot: carregar vídeo de login publicamente + restaurar sessão
 (async function(){
   // 1. Vídeo de login — sem autenticação (rota pública)
@@ -300,6 +359,11 @@ function toast(msg,type){
       if(cfg.videoLoginUrl){
         var lbv=document.getElementById('login-bg-video');
         lbv.src=cfg.videoLoginUrl;lbv.load();lbv.play().catch(function(){});
+      }
+      if(cfg.faviconBase64){
+        var lnk=document.querySelector('link[rel~="icon"]')||document.createElement('link');
+        lnk.rel='icon';lnk.href=cfg.faviconBase64;
+        document.head.appendChild(lnk);
       }
     }
   }catch(e){}

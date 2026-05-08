@@ -457,6 +457,12 @@ document.addEventListener('contextmenu', e => e.preventDefault());
         }).join('');
       }
     }
+    // Favicon dinâmico
+    if (cfg.faviconBase64) {
+      var lnk = document.querySelector('link[rel~="icon"]') || document.createElement('link');
+      lnk.rel = 'icon'; lnk.href = cfg.faviconBase64;
+      document.head.appendChild(lnk);
+    }
   } catch(e) { console.warn('Config load error:', e); }
 })();
 </script>
