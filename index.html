@@ -201,6 +201,53 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
 @media (min-width: 701px) {
   .nav-mobile { display: none; }
 }
+
+
+/* ── CTA Button ── */
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 26px;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-decoration: none;
+  color: #fff;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  position: relative;
+  overflow: hidden;
+  transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s ease, background .25s ease, border-color .25s ease;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  cursor: pointer;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+.cta-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(192,132,252,0.2) 0%, rgba(129,140,248,0.2) 50%, rgba(56,189,248,0.2) 100%);
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+.cta-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.28);
+  box-shadow: 0 6px 24px rgba(129,140,248,0.22);
+}
+.cta-btn:hover::before { opacity: 1; }
+.cta-btn span { position: relative; z-index: 1; }
+.cta-btn svg { position: relative; z-index: 1; transition: transform .25s ease; opacity: .7; }
+.cta-btn:hover svg { transform: translateX(3px); opacity: 1; }
+@media (max-width: 767px) {
+  .cta-btn { font-size: 12px; padding: 10px 22px; margin-top: 16px; margin-bottom: 32px; }
+}
+
 </style>
 </head>
 <body>
@@ -247,8 +294,16 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
       </h1>
 
       <p class="hero-sub" id="hero-sub">Agentes inteligentes que automatizam processos<br>e elevam o padrão profissional e performance do criativo/campanha.</p>
+      <a href="#studios" class="cta-btn">
+        <span>Desbloquear meu acesso</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
 
-      <div class="studios">
+
+
+      <div class="studios" id="studios">
 
         <a href="sports.html" class="studio-card card-sports">
           <div class="card-img">

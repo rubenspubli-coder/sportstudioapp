@@ -689,59 +689,63 @@ function mkPromptBlock(num, text) {
 }
 
 function fmt(text) {
-  // Processar blocos de código fenced (```lang ... ```)
   let html = '';
+  let promptText = '';
+  let negativeText = '';
   const segments = text.split(/(```[\s\S]*?```)/g);
   for (let seg of segments) {
     if (seg.startsWith('```')) {
-      // Extrair linguagem e conteúdo
       const firstLine = seg.indexOf('\n');
       const lang = firstLine > 0 ? seg.slice(3, firstLine).trim() : '';
       const code = firstLine > 0 ? seg.slice(firstLine+1, -3).trim() : seg.slice(3,-3).trim();
-      const label = lang === 'prompt' ? 'PROMPT' : lang === 'negative' ? 'NEGATIVE PROMPT' : lang.toUpperCase() || 'CÓDIGO';
       const escaped = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      html += `<div class="pb-wrap">
-        <div class="pb-label">${label}</div>
-        <pre>${escaped}<button class="cb" title="Copiar" onclick="navigator.clipboard.writeText(this.previousSibling?.textContent||this.closest('.pb-wrap').querySelector('pre').innerText).then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='copiar',1500)})">copiar</button></pre>
-      </div>`;
+      if (lang === 'prompt') {
+        promptText = code;
+        const label = 'PROMPT PRINCIPAL';
+        html += `<div class="pb-wrap"><div class="pb-label">${label}</div><pre>${escaped}<button class="cb" title="Copiar" onclick="copyPre(this)">copiar</button></pre></div>`;
+      } else if (lang === 'negative') {
+        negativeText = code;
+        const label = 'NEGATIVE PROMPT';
+        html += `<div class="pb-wrap"><div class="pb-label">${label}</div><pre>${escaped}<button class="cb" title="Copiar" onclick="copyPre(this)">copiar</button></pre></div>`;
+        // Bloco combinado logo após o negative
+        if (promptText) {
+          const combined = promptText + '\n\n--neg ' + negativeText;
+          const escapedCombo = combined.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          html += `<div class="pb-wrap"><div class="pb-label" style="color:var(--green)">▼ PROMPT + NEGATIVE JUNTOS</div><pre style="border-color:var(--green)">${escapedCombo}<button class="cb" title="Copiar tudo" onclick="copyPre(this)">copiar tudo</button></pre></div>`;
+          promptText = ''; negativeText = '';
+        }
+      } else {
+        const label = lang.toUpperCase() || 'CÓDIGO';
+        html += `<div class="pb-wrap"><div class="pb-label">${label}</div><pre>${escaped}<button class="cb" title="Copiar" onclick="copyPre(this)">copiar</button></pre></div>`;
+      }
     } else if (seg.trim()) {
-      // Processar markdown normal
       const lines = seg.split('\n');
       for (const line of lines) {
-        const t = line
-          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-          .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-          .replace(/\*(.*?)\*/g,'<em>$1</em>');
+        const t = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>');
         if (line.startsWith('## ')) {
           html += `<h3 style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:16px 0 6px;border-bottom:1px solid var(--gdim);padding-bottom:4px;">${t.replace(/^## /,'')}</h3>`;
         } else if (line.startsWith('# ')) {
-          html += `<h2 style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:20px 0 8px;">${t.replace(/^# /,'')}</h2>`;
-        } else if (line.startsWith('- ') || line.startsWith('* ')) {
+          html += `<h2 style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;margin:20px 0 8px;">${t.replace(/^# /,'')}</h2>`;
+        } else if (line.match(/^[-*] /)) {
           html += `<p style="margin-left:12px;">• ${t.slice(2)}</p>`;
-        } else if (line.startsWith('**') && line.endsWith('**')) {
-          html += `<p><strong>${t.replace(/^\*\*/,'').replace(/\*\*$/,'')}</strong></p>`;
         } else if (line.trim()) {
           html += `<p>${t}</p>`;
-        } else {
-          html += '<br>';
-        }
+        } else { html += '<br>'; }
       }
     }
   }
   return html || `<p>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`;
 }
 
+function copyPre(btn) {
+  const pre = btn.closest('pre') || btn.parentElement;
+  const text = Array.from(pre.childNodes).filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
+  navigator.clipboard.writeText(text).then(() => { btn.textContent = '✓'; setTimeout(() => btn.textContent = btn.title === 'Copiar tudo' ? 'copiar tudo' : 'copiar', 1500); });
+}
 
 function fmtStream(text) {
-  // Durante streaming: renderizar markdown básico sem processar blocos incompletos
-  let safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  safe = safe
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/^## (.+)$/gm,'<strong style="color:var(--green)">$1</strong>')
-    .replace(/^# (.+)$/gm,'<strong style="color:var(--green);font-size:1.1em">$1</strong>')
-    .replace(/```[a-z]*/g,'<code style="color:var(--gdim)">')
-    .replace(/```/g,'</code>');
-  return safe.split('\n').join('<br>');
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').split('\n').join('<br>');
 }
 
 
@@ -1790,59 +1794,63 @@ function mkPromptBlock(num, text) {
 }
 
 function fmt(text) {
-  // Processar blocos de código fenced (```lang ... ```)
   let html = '';
+  let promptText = '';
+  let negativeText = '';
   const segments = text.split(/(```[\s\S]*?```)/g);
   for (let seg of segments) {
     if (seg.startsWith('```')) {
-      // Extrair linguagem e conteúdo
       const firstLine = seg.indexOf('\n');
       const lang = firstLine > 0 ? seg.slice(3, firstLine).trim() : '';
       const code = firstLine > 0 ? seg.slice(firstLine+1, -3).trim() : seg.slice(3,-3).trim();
-      const label = lang === 'prompt' ? 'PROMPT' : lang === 'negative' ? 'NEGATIVE PROMPT' : lang.toUpperCase() || 'CÓDIGO';
       const escaped = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      html += `<div class="pb-wrap">
-        <div class="pb-label">${label}</div>
-        <pre>${escaped}<button class="cb" title="Copiar" onclick="navigator.clipboard.writeText(this.previousSibling?.textContent||this.closest('.pb-wrap').querySelector('pre').innerText).then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='copiar',1500)})">copiar</button></pre>
-      </div>`;
+      if (lang === 'prompt') {
+        promptText = code;
+        const label = 'PROMPT PRINCIPAL';
+        html += `<div class="pb-wrap"><div class="pb-label">${label}</div><pre>${escaped}<button class="cb" title="Copiar" onclick="copyPre(this)">copiar</button></pre></div>`;
+      } else if (lang === 'negative') {
+        negativeText = code;
+        const label = 'NEGATIVE PROMPT';
+        html += `<div class="pb-wrap"><div class="pb-label">${label}</div><pre>${escaped}<button class="cb" title="Copiar" onclick="copyPre(this)">copiar</button></pre></div>`;
+        // Bloco combinado logo após o negative
+        if (promptText) {
+          const combined = promptText + '\n\n--neg ' + negativeText;
+          const escapedCombo = combined.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          html += `<div class="pb-wrap"><div class="pb-label" style="color:var(--green)">▼ PROMPT + NEGATIVE JUNTOS</div><pre style="border-color:var(--green)">${escapedCombo}<button class="cb" title="Copiar tudo" onclick="copyPre(this)">copiar tudo</button></pre></div>`;
+          promptText = ''; negativeText = '';
+        }
+      } else {
+        const label = lang.toUpperCase() || 'CÓDIGO';
+        html += `<div class="pb-wrap"><div class="pb-label">${label}</div><pre>${escaped}<button class="cb" title="Copiar" onclick="copyPre(this)">copiar</button></pre></div>`;
+      }
     } else if (seg.trim()) {
-      // Processar markdown normal
       const lines = seg.split('\n');
       for (const line of lines) {
-        const t = line
-          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-          .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-          .replace(/\*(.*?)\*/g,'<em>$1</em>');
+        const t = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>');
         if (line.startsWith('## ')) {
           html += `<h3 style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:16px 0 6px;border-bottom:1px solid var(--gdim);padding-bottom:4px;">${t.replace(/^## /,'')}</h3>`;
         } else if (line.startsWith('# ')) {
-          html += `<h2 style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:20px 0 8px;">${t.replace(/^# /,'')}</h2>`;
-        } else if (line.startsWith('- ') || line.startsWith('* ')) {
+          html += `<h2 style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;margin:20px 0 8px;">${t.replace(/^# /,'')}</h2>`;
+        } else if (line.match(/^[-*] /)) {
           html += `<p style="margin-left:12px;">• ${t.slice(2)}</p>`;
-        } else if (line.startsWith('**') && line.endsWith('**')) {
-          html += `<p><strong>${t.replace(/^\*\*/,'').replace(/\*\*$/,'')}</strong></p>`;
         } else if (line.trim()) {
           html += `<p>${t}</p>`;
-        } else {
-          html += '<br>';
-        }
+        } else { html += '<br>'; }
       }
     }
   }
   return html || `<p>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`;
 }
 
+function copyPre(btn) {
+  const pre = btn.closest('pre') || btn.parentElement;
+  const text = Array.from(pre.childNodes).filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
+  navigator.clipboard.writeText(text).then(() => { btn.textContent = '✓'; setTimeout(() => btn.textContent = btn.title === 'Copiar tudo' ? 'copiar tudo' : 'copiar', 1500); });
+}
 
 function fmtStream(text) {
-  // Durante streaming: renderizar markdown básico sem processar blocos incompletos
-  let safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  safe = safe
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/^## (.+)$/gm,'<strong style="color:var(--green)">$1</strong>')
-    .replace(/^# (.+)$/gm,'<strong style="color:var(--green);font-size:1.1em">$1</strong>')
-    .replace(/```[a-z]*/g,'<code style="color:var(--gdim)">')
-    .replace(/```/g,'</code>');
-  return safe.split('\n').join('<br>');
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').split('\n').join('<br>');
 }
 
 
