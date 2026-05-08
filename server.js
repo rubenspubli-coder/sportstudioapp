@@ -55,6 +55,7 @@ async function initDB() {
       headline: 'Cinematic<br><span class="gradient-text">AI Studio</span>',
       subheadline: 'Agentes inteligentes que automatizam processos<br>e elevam o padrão profissional e performance do criativo/campanha.',
       videoUrl: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4',
+      videoLoginUrl: '',
       navLinks: JSON.stringify([
         { label: 'Sports', url: 'sports.html' },
         { label: 'Illusion', url: 'illusion.html' },
