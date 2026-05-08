@@ -290,8 +290,21 @@ function toast(msg,type){
   setTimeout(function(){t.classList.remove('show');},6000);
 }
 
-// Boot: restaurar sessão salva
+// Boot: carregar vídeo de login publicamente + restaurar sessão
 (async function(){
+  // 1. Vídeo de login — sem autenticação (rota pública)
+  try{
+    var rc=await fetch('/config.json');
+    if(rc.ok){
+      var cfg=await rc.json();
+      if(cfg.videoLoginUrl){
+        var lbv=document.getElementById('login-bg-video');
+        lbv.src=cfg.videoLoginUrl;lbv.load();lbv.play().catch(function(){});
+      }
+    }
+  }catch(e){}
+
+  // 2. Restaurar sessão salva
   var saved=_S.getItem(TK);if(!saved)return;
   try{
     var r=await fetch('/admin/config',{headers:{'Authorization':'Bearer '+saved}});
