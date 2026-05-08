@@ -518,6 +518,38 @@ document.addEventListener('contextmenu', e => e.preventDefault());
       lnk.rel = 'icon'; lnk.href = cfg.faviconBase64;
       document.head.appendChild(lnk);
     }
+    // Cards da home — atualizar descrições, CTAs e imagens dinamicamente
+    if (Array.isArray(cfg.cards) && cfg.cards.length) {
+      cfg.cards.forEach(function(card) {
+        if (!card.id) return;
+        var el = document.querySelector('.card-' + card.id);
+        if (!el) return;
+        // Descrição
+        if (card.desc) {
+          var descEl = el.querySelector('.card-desc');
+          if (descEl) descEl.textContent = card.desc;
+        }
+        // Texto do CTA
+        if (card.cta) {
+          var ctaEl = el.querySelector('.card-cta');
+          if (ctaEl) {
+            // Preservar o SVG arrow dentro do CTA
+            var svg = ctaEl.querySelector('svg');
+            ctaEl.textContent = card.cta;
+            if (svg) ctaEl.appendChild(svg);
+          }
+        }
+        // Imagem do card
+        if (card.img) {
+          var imgEl = el.querySelector('.card-img img');
+          if (imgEl) imgEl.src = card.img;
+        }
+        // URL do link
+        if (card.url) {
+          el.href = card.url;
+        }
+      });
+    }
   } catch(e) { console.warn('Config load error:', e); }
 })();
 </script>
