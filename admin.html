@@ -73,6 +73,39 @@
   .toast.show{transform:translateY(0);opacity:1}
   .toast.err{background:var(--danger)}
   @media(max-width:600px){.ab{padding:24px 16px}.nr{grid-template-columns:1fr auto}.nr input:nth-child(2){display:none}.pw2{grid-template-columns:1fr}}
+
+  /* Cards section */
+  .card-editor-item { background:var(--surface2,#16112a); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px; }
+  .card-editor-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .card-thumb { width:56px; height:42px; object-fit:cover; border-radius:6px; background:rgba(255,255,255,0.06); flex-shrink:0; }
+  .card-editor-name { font-size:13px; font-weight:600; color:var(--fg); flex:1; }
+  .card-editor-toggle { background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:6px; padding:5px 12px; font-size:11px; color:var(--muted); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .2s; }
+  .card-editor-toggle:hover { background:rgba(255,255,255,0.1); color:var(--fg); }
+  .card-editor-body { display:none; }
+  .card-editor-body.open { display:block; }
+  .card-editor-body input[type=text], .card-editor-body textarea { margin-bottom:10px; }
+  .card-img-upload { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .card-img-preview { width:80px; height:60px; object-fit:cover; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid var(--border); flex-shrink:0; }
+  .card-img-drop { flex:1; border:1.5px dashed var(--border2); border-radius:10px; padding:14px; text-align:center; cursor:pointer; position:relative; transition:all .2s; }
+  .card-img-drop:hover { border-color:var(--accent); background:rgba(124,58,237,.05); }
+  .card-img-drop input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+  .card-img-drop p { font-size:12px; color:var(--muted); margin:0; pointer-events:none; }
+  .card-row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .card-row2 input { margin-bottom:0; }
+  .agent-prompt-section { background:rgba(124,58,237,.06); border:1px solid rgba(124,58,237,.2); border-radius:10px; padding:16px; margin-top:12px; }
+  .agent-prompt-section label { color:var(--accent2); }
+  .agent-prompt-section textarea { min-height:140px; font-size:12px; font-family:'DM Sans',monospace; }
+  .agent-color-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .agent-color-row input[type=color] { width:40px; height:36px; border:1px solid var(--border); border-radius:8px; background:transparent; cursor:pointer; padding:2px; }
+  .agent-color-row input[type=text] { flex:1; margin-bottom:0; }
+  .save-card-btn { background:var(--accent); border:none; border-radius:8px; padding:9px 22px; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#fff; cursor:pointer; transition:background .2s; margin-top:4px; }
+  .save-card-btn:hover { background:var(--accent2); }
+  .del-card-btn { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:8px; padding:9px 16px; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; text-transform:uppercase; color:#f87171; cursor:pointer; margin-top:4px; margin-left:8px; transition:all .2s; }
+  .del-card-btn:hover { background:rgba(239,68,68,.18); }
+  .add-card-wrap { border:1.5px dashed var(--border2); border-radius:12px; padding:20px; text-align:center; cursor:pointer; transition:all .2s; }
+  .add-card-wrap:hover { border-color:var(--accent); background:rgba(124,58,237,.04); }
+  .add-card-wrap p { font-size:13px; color:var(--muted); margin:4px 0 0; }
+
 </style>
 </head>
 <body>
@@ -168,6 +201,14 @@
       <button class="sb" onclick="saveFavicon()">Salvar Favicon</button>
     </div>
 
+    
+    <div class="st">Cards da Home</div>
+    <div id="cards-editor"></div>
+    <div class="add-card-wrap" onclick="addNewCard()">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="opacity:.5"><circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M11 7v8M7 11h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <p>Adicionar novo card / agente</p>
+    </div>
+
     <div class="st">Segurança</div>
     <div class="card">
       <label>Alterar senha</label>
@@ -234,6 +275,7 @@ async function loadCfg(){
     var ti=Array.isArray(c.tickerItems)?c.tickerItems:[{icon:'A',label:'Anthropic'},{icon:'C',label:'Claude'},{icon:'U',label:'Unreal 5'},{icon:'P',label:'RenderMan'},{icon:'D',label:'DreamWorks'},{icon:'M',label:'MoonRay'},{icon:'S',label:'Stable Diffusion'},{icon:'R',label:'Railway'}];
     renderTick(ti);
     if(c.faviconBase64)loadFaviconPreview(c.faviconBase64);
+    loadCardsFromCfg(c);
   }catch(e){toast('Erro ao carregar: '+e.message,'err');}
 }
 
@@ -347,6 +389,153 @@ async function saveFavicon(){
     if(!d.ok)throw new Error(d.error||'Erro');
     toast('✓ Favicon salvo! Recarregue o site para ver.');
   }catch(e){toast(e.message,'err');}
+}
+
+
+// ── CARDS EDITOR ─────────────────────────────────────────────────────────────
+var cardsData = [];
+
+var DEFAULT_CARDS = [
+  {id:'sports',    name:'sports',   nameSpan:'studio',    color:'#39ff14', desc:'Faça imagens cinematográficas esportivas com atletas, ideal para marketing esportivo, agências e casas de apostas.', cta:'Acessar', url:'sports.html',    img:'', systemPrompt:''},
+  {id:'illusion',  name:'illusion', nameSpan:'studio',    color:'#F50579', desc:'Aqui o mundo lúdico e mágico ganham vida. Crie cenas fantásticas com os personagens mais fofos que sua imaginação permitir.', cta:'Acessar', url:'illusion.html',  img:'', systemPrompt:''},
+  {id:'mascot',    name:'mascot',   nameSpan:'studio',    color:'#FFDC1B', desc:'Crie mascotes 3D estilizados de alto nível. A engine desse agente te entrega verdadeiras obras primas.', cta:'Acessar', url:'mascot.html',    img:'', systemPrompt:''},
+  {id:'lettering', name:'lettering',nameSpan:'studio',    color:'#0090ff', desc:'Crie prompts 3D para lettering e tipografia estilizada com renderização cinematográfica.', cta:'Acessar', url:'lettering.html', img:'', systemPrompt:''},
+  {id:'liveaction',name:'live',     nameSpan:'action',    color:'#BA3232', desc:'Dê vida a sua imaginação e aos seus personagens e desenhos favoritos com esse fantástico agente.', cta:'Acessar', url:'liveaction.html', img:'', systemPrompt:''},
+  {id:'extraidor', name:'extrator', nameSpan:'de prompt', color:'#d55715', desc:'Analise qualquer imagem e extraia prompts técnicos de alta fidelidade para MidJourney, DALL-E, Stable Diffusion e Runway.', cta:'Acessar', url:'extraidor.html', img:'', systemPrompt:''},
+];
+
+function loadCardsFromCfg(cfg) {
+  cardsData = Array.isArray(cfg.cards) && cfg.cards.length ? cfg.cards : JSON.parse(JSON.stringify(DEFAULT_CARDS));
+  renderCardsEditor();
+}
+
+function renderCardsEditor() {
+  var ed = document.getElementById('cards-editor');
+  ed.innerHTML = '';
+  cardsData.forEach(function(card, idx) {
+    var div = document.createElement('div');
+    div.className = 'card-editor-item';
+    div.setAttribute('data-idx', idx);
+    div.innerHTML =
+      '<div class="card-editor-header">' +
+        (card.img ? '<img class="card-thumb" src="'+esc(card.img)+'" alt="">' : '<div class="card-thumb"></div>') +
+        '<span class="card-editor-name">'+esc(card.name)+' <span style="color:'+esc(card.color)+'">'+esc(card.nameSpan)+'</span></span>' +
+        '<button class="card-editor-toggle" onclick="toggleCardEditor(this)">Editar ▾</button>' +
+      '</div>' +
+      '<div class="card-editor-body">' +
+        '<label>Nome (parte branca)</label><input type="text" value="'+esc(card.name)+'" class="ce-name" placeholder="sports">' +
+        '<label>Nome (parte colorida)</label><input type="text" value="'+esc(card.nameSpan)+'" class="ce-span" placeholder="studio">' +
+        '<label>Cor do agente</label>' +
+        '<div class="agent-color-row"><input type="color" value="'+esc(card.color)+'" class="ce-colorpicker" oninput="this.nextElementSibling.value=this.value"><input type="text" value="'+esc(card.color)+'" class="ce-color" placeholder="#39ff14" oninput="this.previousElementSibling.value=this.value"></div>' +
+        '<label>Descrição</label><textarea class="ce-desc" rows="2">'+esc(card.desc)+'</textarea>' +
+        '<div class="card-row2"><div><label>Texto do CTA</label><input type="text" value="'+esc(card.cta)+'" class="ce-cta" placeholder="Acessar"></div><div><label>URL do agente</label><input type="text" value="'+esc(card.url)+'" class="ce-url" placeholder="sports.html"></div></div>' +
+        '<label style="margin-top:12px;display:block">Imagem do card</label>' +
+        '<div class="card-img-upload">' +
+          '<img class="card-img-preview" src="'+(card.img||'')+'" alt="" style="'+(card.img?'':'display:none')+'">' +
+          '<div class="card-img-drop"><input type="file" accept="image/*" onchange="onCardImgSelect(this,'+(idx)+')"><p>📎 Clique ou arraste uma imagem<br><small>PNG, JPG — max 512KB</small></p></div>' +
+        '</div>' +
+        '<div class="agent-prompt-section">' +
+          '<label>⚡ System Prompt do agente (opcional)</label>' +
+          '<p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Cole aqui o system prompt para criar/atualizar o agente no servidor. Deixe vazio para manter o prompt existente.</p>' +
+          '<textarea class="ce-prompt" rows="6" placeholder="Você é um especialista em...">'+esc(card.systemPrompt||'')+'</textarea>' +
+        '</div>' +
+        '<div style="margin-top:12px">' +
+          '<button class="save-card-btn" onclick="saveCard('+idx+')">Salvar card</button>' +
+          '<button class="del-card-btn" onclick="deleteCard('+idx+')">Remover</button>' +
+        '</div>' +
+      '</div>';
+    ed.appendChild(div);
+  });
+}
+
+function toggleCardEditor(btn) {
+  var body = btn.closest('.card-editor-item').querySelector('.card-editor-body');
+  body.classList.toggle('open');
+  btn.textContent = body.classList.contains('open') ? 'Fechar ▴' : 'Editar ▾';
+}
+
+function onCardImgSelect(input, idx) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 512*1024) { toast('Imagem muito grande. Max 512KB.','err'); input.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    cardsData[idx]._pendingImg = e.target.result;
+    var item = document.querySelectorAll('.card-editor-item')[idx];
+    var prev = item.querySelector('.card-img-preview');
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveCard(idx) {
+  var item = document.querySelectorAll('.card-editor-item')[idx];
+  var card = cardsData[idx];
+  card.name      = item.querySelector('.ce-name').value.trim();
+  card.nameSpan  = item.querySelector('.ce-span').value.trim();
+  card.color     = item.querySelector('.ce-color').value.trim();
+  card.desc      = item.querySelector('.ce-desc').value.trim();
+  card.cta       = item.querySelector('.ce-cta').value.trim();
+  card.url       = item.querySelector('.ce-url').value.trim();
+  card.systemPrompt = item.querySelector('.ce-prompt').value.trim();
+  if (card._pendingImg) { card.img = card._pendingImg; delete card._pendingImg; }
+
+  // Se há system prompt → enviar para criar/atualizar agente no servidor
+  if (card.systemPrompt) {
+    try {
+      var r = await fetch('/admin/agent', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body: JSON.stringify({ id: card.id || card.url.replace('.html',''), name: card.name, nameSpan: card.nameSpan, color: card.color, systemPrompt: card.systemPrompt })
+      });
+      var d = await r.json();
+      if (!r.ok) throw new Error(d.error||'Erro ao salvar agente');
+      toast('✓ Agente criado/atualizado no servidor!');
+    } catch(e) { toast(e.message,'err'); return; }
+  }
+
+  await saveAllCards();
+}
+
+async function saveAllCards() {
+  try {
+    var r = await fetch('/admin/config', {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({ cards: cardsData })
+    });
+    if (r.status===401){doLogout();return;}
+    var d = await r.json();
+    if (!d.ok) throw new Error(d.error||'Erro');
+    renderCardsEditor();
+    toast('✓ Card salvo! Recarregue o site para ver.');
+  } catch(e) { toast(e.message,'err'); }
+}
+
+async function deleteCard(idx) {
+  if (!confirm('Remover este card da home?')) return;
+  cardsData.splice(idx, 1);
+  await saveAllCards();
+}
+
+function addNewCard() {
+  var newCard = {
+    id: 'agente-' + Date.now(),
+    name: 'novo', nameSpan: 'agente', color: '#7c3aed',
+    desc: 'Descrição do agente.', cta: 'Acessar',
+    url: 'novo-agente.html', img: '', systemPrompt: ''
+  };
+  cardsData.push(newCard);
+  renderCardsEditor();
+  // Abrir o editor do novo card automaticamente
+  var items = document.querySelectorAll('.card-editor-item');
+  var last = items[items.length-1];
+  if (last) {
+    last.querySelector('.card-editor-body').classList.add('open');
+    last.querySelector('.card-editor-toggle').textContent = 'Fechar ▴';
+    last.scrollIntoView({behavior:'smooth', block:'center'});
+  }
 }
 
 // Boot: carregar vídeo de login publicamente + restaurar sessão
