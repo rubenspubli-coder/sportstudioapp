@@ -427,7 +427,7 @@ function renderCardsEditor() {
         '<label>Nome (parte colorida)</label><input type="text" value="'+esc(card.nameSpan)+'" class="ce-span" placeholder="studio">' +
         '<label>Cor do agente</label>' +
         '<div class="agent-color-row"><input type="color" value="'+esc(card.color)+'" class="ce-colorpicker" oninput="this.nextElementSibling.value=this.value"><input type="text" value="'+esc(card.color)+'" class="ce-color" placeholder="#39ff14" oninput="this.previousElementSibling.value=this.value"></div>' +
-        '<label>Descrição</label><textarea class="ce-desc" rows="2">'+esc(card.desc)+'</textarea>' +
+        '<label>Descrição</label><textarea class="ce-desc" rows="2"></textarea>' +
         '<div class="card-row2"><div><label>Texto do CTA</label><input type="text" value="'+esc(card.cta)+'" class="ce-cta" placeholder="Acessar"></div><div><label>URL do agente</label><input type="text" value="'+esc(card.url)+'" class="ce-url" placeholder="sports.html"></div></div>' +
         '<label style="margin-top:12px;display:block">Imagem do card</label>' +
         '<div class="card-img-upload">' +
@@ -445,6 +445,8 @@ function renderCardsEditor() {
         '</div>' +
       '</div>';
     ed.appendChild(div);
+    // Setar valores via .value para evitar problema com entidades HTML em textarea
+    div.querySelector('.ce-desc').value = card.desc || '';
   });
 }
 
