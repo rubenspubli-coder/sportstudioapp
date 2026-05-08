@@ -311,18 +311,30 @@ function getAuthUser(req) {
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
   return token ? verifyJWT(token) : null;
 }
-function callAnthropic(systemPrompt, messages, res) {
-  const body = JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 4096, system: systemPrompt, messages });
+function callAnthropic(systemPrompt, clientBody, res) {
+  // Mesclar o body do cliente com o system prompt do servidor
+  const parsed = typeof clientBody === 'string' ? JSON.parse(clientBody) : clientBody;
+  const { angle, proportion, description, hasImage, ...rest } = parsed;
+  const finalBody = JSON.stringify({ ...rest, system: systemPrompt });
+  
   const options = {
     hostname: 'api.anthropic.com', path: '/v1/messages', method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01' }
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version': '2023-06-01',
+      'Content-Length': Buffer.byteLength(finalBody)
+    }
   };
   const apiReq = https.request(options, apiRes => {
-    res.writeHead(apiRes.statusCode, { 'Content-Type': apiRes.headers['content-type'] || 'application/json', 'Access-Control-Allow-Origin': '*' });
+    res.writeHead(apiRes.statusCode, {
+      'Content-Type': apiRes.headers['content-type'] || 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
     apiRes.pipe(res);
   });
   apiReq.on('error', err => { res.writeHead(500); res.end(JSON.stringify({error: err.message})); });
-  apiReq.write(body);
+  apiReq.write(finalBody);
   apiReq.end();
 }
 
@@ -347,15 +359,16 @@ const server = http.createServer(async (req, res) => {
       if (!messages) { res.writeHead(400); res.end('Missing messages'); return; }
 
       let systemPrompt = '';
-      if (agent === 'sports')    systemPrompt = getSportsPrompt(angle, proportion, description, hasImage);
-      else if (agent === 'illusion')  systemPrompt = PROMPT_ILLUSION;
-      else if (agent === 'mascot')    systemPrompt = PROMPT_MASCOT;
-      else if (agent === 'lettering') systemPrompt = PROMPT_LETTERING;
+      if (agent === 'sports')         systemPrompt = getSportsPrompt(angle, proportion, description, hasImage);
+      else if (agent === 'illusion')   systemPrompt = PROMPT_ILLUSION;
+      else if (agent === 'mascot')     systemPrompt = PROMPT_MASCOT;
+      else if (agent === 'lettering')  systemPrompt = PROMPT_LETTERING;
       else if (agent === 'liveaction') systemPrompt = getLiveActionPrompt(angle, proportion, description, hasImage);
-      else if (agent === 'extraidor') systemPrompt = getExtraidorPrompt(description);
+      else if (agent === 'extraidor')  systemPrompt = getExtraidorPrompt(description);
       else { res.writeHead(404); res.end('Agent not found'); return; }
 
-      callAnthropic(systemPrompt, messages, res);
+      // Passa o body original para preservar stream, max_tokens, model, etc.
+      callAnthropic(systemPrompt, body, res);
     });
     return;
   }
