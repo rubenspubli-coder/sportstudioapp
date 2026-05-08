@@ -143,7 +143,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-var TK='cinematic_admin_token', token=null;
+var TK='cinematic_admin_token', token=null, _S=sessionStorage;
 
 async function doLogin(){
   var btn=document.getElementById('lbtn'),err=document.getElementById('lerr');
@@ -155,7 +155,7 @@ async function doLogin(){
     var r=await fetch('/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
     var d=await r.json();
     if(!r.ok)throw new Error(d.error||'Erro');
-    token=d.token;localStorage.setItem(TK,token);showPanel(d.username);
+    token=d.token;_S.setItem(TK,token);showPanel(d.username);
   }catch(e){
     err.textContent=e.message==='Invalid credentials'?'Usuário ou senha incorretos.':e.message;
     err.style.display='block';btn.disabled=false;btn.textContent='Entrar';
@@ -163,7 +163,7 @@ async function doLogin(){
 }
 
 function doLogout(){
-  token=null;localStorage.removeItem(TK);
+  token=null;_S.removeItem(TK);
   document.getElementById('admin-panel').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('lp').value='';
@@ -270,15 +270,15 @@ function toast(msg,type){
 
 // Boot: restaurar sessão salva
 (async function(){
-  var saved=localStorage.getItem(TK);if(!saved)return;
+  var saved=_S.getItem(TK);if(!saved)return;
   try{
     var r=await fetch('/admin/config',{headers:{'Authorization':'Bearer '+saved}});
     if(r.ok){
       token=saved;
       var pl=JSON.parse(atob(saved.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
       showPanel(pl.username||'admin');
-    }else{localStorage.removeItem(TK);}
-  }catch(e){localStorage.removeItem(TK);}
+    }else{_S.removeItem(TK);}
+  }catch(e){_S.removeItem(TK);}
 })();
 </script>
 </body>
