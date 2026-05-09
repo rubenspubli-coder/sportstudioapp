@@ -518,35 +518,70 @@ document.addEventListener('contextmenu', e => e.preventDefault());
       lnk.rel = 'icon'; lnk.href = cfg.faviconBase64;
       document.head.appendChild(lnk);
     }
-    // Cards da home — atualizar descrições, CTAs e imagens dinamicamente
+    // Cards da home — atualizar existentes e criar novos
     if (Array.isArray(cfg.cards) && cfg.cards.length) {
+      var studios = document.getElementById('studios');
+      var arrowSVG = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
       cfg.cards.forEach(function(card) {
         if (!card.id) return;
         var el = document.querySelector('.card-' + card.id);
-        if (!el) return;
-        // Descrição
-        if (card.desc) {
-          var descEl = el.querySelector('.card-desc');
-          if (descEl) descEl.textContent = card.desc;
-        }
-        // Texto do CTA
-        if (card.cta) {
-          var ctaEl = el.querySelector('.card-cta');
-          if (ctaEl) {
-            // Preservar o SVG arrow dentro do CTA
-            var svg = ctaEl.querySelector('svg');
-            ctaEl.textContent = card.cta;
-            if (svg) ctaEl.appendChild(svg);
+
+        if (el) {
+          // Card já existe — apenas atualizar campos
+          if (card.desc) {
+            var descEl = el.querySelector('.card-desc');
+            if (descEl) descEl.textContent = card.desc;
           }
-        }
-        // Imagem do card
-        if (card.img) {
-          var imgEl = el.querySelector('.card-img img');
-          if (imgEl) imgEl.src = card.img;
-        }
-        // URL do link
-        if (card.url) {
-          el.href = card.url;
+          if (card.cta) {
+            var ctaEl = el.querySelector('.card-cta');
+            if (ctaEl) { ctaEl.innerHTML = arrowSVG + ' ' + card.cta; }
+          }
+          if (card.img) {
+            var imgEl = el.querySelector('.card-img img');
+            if (imgEl) imgEl.src = card.img;
+          }
+          if (card.url) el.href = card.url;
+        } else {
+          // Card novo — criar dinamicamente e injetar CSS de cor
+          var slug = card.id;
+          var color = card.color || '#a855f7';
+          var rgb = color.replace('#','');
+          var r = parseInt(rgb.substring(0,2),16);
+          var g = parseInt(rgb.substring(2,4),16);
+          var b = parseInt(rgb.substring(4,6),16);
+
+          // Injetar CSS da cor desse card
+          var style = document.createElement('style');
+          style.textContent =
+            '.card-' + slug + '::after { background: radial-gradient(circle at 50% 60%, rgba(' + r + ',' + g + ',' + b + ',0.14) 0%, transparent 70%); }' +
+            '.card-' + slug + ':hover { box-shadow: 0 28px 64px rgba(' + r + ',' + g + ',' + b + ',0.2); }' +
+            '.card-' + slug + ' .card-title span { color: ' + color + '; }' +
+            '.card-' + slug + ' .card-cta { color: ' + color + '; background: rgba(' + r + ',' + g + ',' + b + ',0.07); }' +
+            '.card-' + slug + ':hover .card-cta { background: ' + color + '; color: #fff; }';
+          document.head.appendChild(style);
+
+          // Criar elemento do card
+          var a = document.createElement('a');
+          a.href = card.url || ('/agent/' + slug);
+          a.className = 'studio-card card-' + slug;
+
+          var imgSrc = card.img || '';
+          var imgHtml = imgSrc
+            ? '<div class="card-img"><img src="' + imgSrc + '" alt="' + (card.name||'') + '" loading="lazy"></div>'
+            : '<div class="card-img" style="background:rgba(' + r + ',' + g + ',' + b + ',0.08);display:flex;align-items:center;justify-content:center;"><span style="font-size:40px;opacity:.3">✦</span></div>';
+
+          var nameParts = (card.name || slug).toLowerCase();
+          var spanPart = card.nameSpan ? ' <span>' + card.nameSpan.toLowerCase() + '</span>' : '';
+
+          a.innerHTML = imgHtml +
+            '<div class="card-info">' +
+              '<div class="card-title">' + nameParts + spanPart + '</div>' +
+              '<div class="card-desc">' + (card.desc || '') + '</div>' +
+              '<div class="card-cta">' + arrowSVG + ' ' + (card.cta || 'Acessar') + '</div>' +
+            '</div>';
+
+          if (studios) studios.appendChild(a);
         }
       });
     }

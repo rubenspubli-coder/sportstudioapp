@@ -483,17 +483,33 @@ async function saveCard(idx) {
   card.systemPrompt = item.querySelector('.ce-prompt').value.trim();
   if (card._pendingImg) { card.img = card._pendingImg; delete card._pendingImg; }
 
-  // Se há system prompt → enviar para criar/atualizar agente no servidor
+  // Se há system prompt → criar/atualizar agente no servidor
   if (card.systemPrompt) {
     try {
+      var makeslug = function(s) {
+        return String(s||'').toLowerCase()
+          .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+      };
+      var agentId = (card.url && card.url.startsWith('/agent/'))
+        ? card.url.replace('/agent/','')
+        : (card.id && !card.id.startsWith('agente-'))
+          ? card.id
+          : makeslug(card.name + (card.nameSpan ? '-' + card.nameSpan : ''));
       var r = await fetch('/admin/agent', {
         method: 'POST',
         headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
-        body: JSON.stringify({ id: card.id || card.url.replace('.html',''), name: card.name, nameSpan: card.nameSpan, color: card.color, systemPrompt: card.systemPrompt })
+        body: JSON.stringify({ id: agentId, name: card.name, nameSpan: card.nameSpan, color: card.color, systemPrompt: card.systemPrompt })
       });
       var d = await r.json();
       if (!r.ok) throw new Error(d.error||'Erro ao salvar agente');
-      toast('✓ Agente criado/atualizado no servidor!');
+      // Atualizar card com slug e URL corretos retornados pelo servidor
+      if (d.slug) {
+        card.id = d.slug;
+        card.url = d.url || ('/agent/' + d.slug);
+        // Atualizar o campo URL no editor
+        var urlInput = item.querySelector('.ce-url');
+        if (urlInput) urlInput.value = card.url;
+      }
     } catch(e) { toast(e.message,'err'); return; }
   }
 
@@ -526,7 +542,7 @@ function addNewCard() {
     id: 'agente-' + Date.now(),
     name: 'novo', nameSpan: 'agente', color: '#7c3aed',
     desc: 'Descrição do agente.', cta: 'Acessar',
-    url: 'novo-agente.html', img: '', systemPrompt: ''
+    url: '', img: '', systemPrompt: ''
   };
   cardsData.push(newCard);
   renderCardsEditor();
