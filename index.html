@@ -32,6 +32,7 @@ html { min-height: 100%; background: var(--bg); color: var(--fg); font-family: '
 .hero-wrapper { position: relative; min-height: 100vh; display: flex; flex-direction: column; }
 
 #bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; z-index: 0; pointer-events: none; }
+#bg-video-overlay { position: absolute; inset: 0; z-index: 1; background: rgba(0,0,0,0.55); pointer-events: none; }
 
 .hero-content { position: relative; z-index: 10; display: flex; flex-direction: column; min-height: 100vh; }
 
@@ -253,7 +254,8 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
 <body>
 
 <div class="hero-wrapper">
-  <video id="bg-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4" muted playsinline autoplay crossorigin="anonymous" preload="auto"></video>
+  <video id="bg-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4" muted playsinline autoplay loop crossorigin="anonymous" preload="auto"></video>
+  <div id="bg-video-overlay"></div>
 
   <div class="hero-content">
     <div class="blur-overlay"></div>
