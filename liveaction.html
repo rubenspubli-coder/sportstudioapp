@@ -108,6 +108,7 @@ header {
 .av.bot { background:var(--green);color:#000; }
 .av.user { background:var(--s2);color:var(--green);border:1px solid var(--gdim); }
 .mc { flex:1;font-size:13.5px;line-height:1.65;color:var(--text);min-width:0; }
+.stream-td { display:block; width:100%; }
 .msg.user .mc { text-align:right;color:#ebc8c8; }
 .mc p { margin-bottom:5px; } .mc p:last-child { margin-bottom:0; }
 .mi { max-width:180px;max-height:180px;border-radius:9px;border:1px solid var(--gdim);display:block;margin-bottom:7px;object-fit:cover; }
@@ -215,7 +216,7 @@ header {
   .main { width: 100%; }
   #chat { flex: 1; min-height: 0; }
   .inp { background-color:#0a0a0a; background-image:radial-gradient(circle,#2a2a2a 1px,transparent 1px); background-size:24px 24px; border-top:none; padding:12px 12px max(16px,env(safe-area-inset-bottom)); flex-shrink:0; display:flex; justify-content:center; }
-  .glass-bar-wrap { width:calc(100% - 24px); max-width:100%; }
+  .glass-bar-wrap { width:80%; max-width:100%; margin:0 auto; box-sizing:border-box; }
   .ir { gap: 6px; }
   #ul, #ratio-btn, #angle-inline-btn { width: 38px; height: 38px; }
   #sb { width: 38px; height: 38px; }
@@ -246,8 +247,9 @@ header {
 .glass-bar-wrap {
   position: relative;
   margin: 0 auto;
-  width: calc(100% - 0px);
+  width: 80%;
   max-width: 100%;
+  box-sizing: border-box;
 }
 .glass-bar-wrap::before {
   content: '';

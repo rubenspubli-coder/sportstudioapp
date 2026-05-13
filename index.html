@@ -32,7 +32,7 @@ html { min-height: 100%; background: var(--bg); color: var(--fg); font-family: '
 .hero-wrapper { position: relative; min-height: 100vh; display: flex; flex-direction: column; }
 
 #bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; z-index: 0; pointer-events: none; }
-#bg-video-overlay { position: absolute; inset: 0; z-index: 1; background: rgba(0,0,0,0.55); pointer-events: none; }
+#bg-video-overlay { position: absolute; inset: 0; z-index: 1; background: rgba(0,0,0,0.45); pointer-events: none; }
 
 .hero-content { position: relative; z-index: 10; display: flex; flex-direction: column; min-height: 100vh; }
 
@@ -254,7 +254,7 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
 <body>
 
 <div class="hero-wrapper">
-  <video id="bg-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4" muted playsinline autoplay loop crossorigin="anonymous" preload="auto"></video>
+  <video id="bg-video" src="https://cdn-cf-east.streamable.com/video/mp4/lky6mk.mp4?Expires=1778908429675&Key-Pair-Id=APKAIEYUVEN4EVB2OKEQ&Signature=iLhTRENiOs9aVUhO~Xd7KK929yN8uT3TX4kmn420A9xfFSA2JklmPPEqYGPf-KskAuDQXGhp2MRdPhu7bPZq8FSY2ssnHNLnx1BsNedhJbBWNm~3-Gxp~vTfLDuXWQY0lE3ytI6OH6Q0XDjGRh5e1vjVeON0ekFggGh9JFlZzja-QYDApJa0xvueLqQkFWkW2xIyiQ6lq4tgovGfANLmJzV~1Hmr20QxbGSTiZ7C5A-de4KMAy7wJGQBNjjto2fs8-tv7YqijhFvLcBTGZlc9AwXE1assTxH2eqXns~DxXoelLQZMmsD3FPXF1FLvcxlDJ0PoNooXEcXCD76B9RXeQ__" muted playsinline autoplay loop crossorigin="anonymous" preload="auto"></video>
   <div id="bg-video-overlay"></div>
 
   <div class="hero-content">
@@ -588,6 +588,48 @@ document.addEventListener('contextmenu', e => e.preventDefault());
       });
     }
   } catch(e) { console.warn('Config load error:', e); }
+})();
+</script>
+
+
+<script>
+// ── Loop forçado do vídeo de background ─────────────────────────────────────
+(function() {
+  var vid = document.getElementById('bg-video');
+  if (!vid) return;
+
+  // Garantir atributos
+  vid.loop = true;
+  vid.muted = true;
+
+  // Reiniciar quando termina
+  vid.addEventListener('ended', function() {
+    vid.currentTime = 0;
+    vid.play().catch(function(){});
+  });
+
+  // Detectar se travou (currentTime parado por > 3s)
+  var lastTime = -1, stuckCount = 0;
+  setInterval(function() {
+    if (vid.paused || vid.ended) {
+      vid.play().catch(function(){});
+      return;
+    }
+    if (vid.currentTime === lastTime) {
+      stuckCount++;
+      if (stuckCount >= 2) { // travado por ~2s
+        vid.currentTime = 0;
+        vid.play().catch(function(){});
+        stuckCount = 0;
+      }
+    } else {
+      stuckCount = 0;
+    }
+    lastTime = vid.currentTime;
+  }, 1000);
+
+  // Iniciar
+  vid.play().catch(function(){});
 })();
 </script>
 
