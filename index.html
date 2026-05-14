@@ -491,6 +491,16 @@ document.addEventListener('contextmenu', e => e.preventDefault());
       var vid = document.getElementById('bg-video');
       if (vid) { vid.src = cfg.videoUrl; vid.load(); }
     }
+    // Overlay dinâmico
+    if (cfg.overlayColor !== undefined || cfg.overlayOpacity !== undefined) {
+      var ov = document.getElementById('bg-video-overlay');
+      if (ov) {
+        var oc = cfg.overlayColor || '#000000';
+        var oop = cfg.overlayOpacity !== undefined ? cfg.overlayOpacity : 0.45;
+        var r2=parseInt(oc.slice(1,3),16)||0, g2=parseInt(oc.slice(3,5),16)||0, b2=parseInt(oc.slice(5,7),16)||0;
+        ov.style.background = 'rgba('+r2+','+g2+','+b2+','+oop+')';
+      }
+    }
     if (Array.isArray(cfg.navLinks) && cfg.navLinks.length) {
       [document.getElementById('nav-links'), document.querySelector('.nav-mobile-links')].forEach(function(nl) {
         if (!nl) return;
