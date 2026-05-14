@@ -97,6 +97,11 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
 .card-lettering::after{ background: radial-gradient(circle at 50% 60%, rgba(0,144,255,0.12) 0%, transparent 70%); }
 .card-liveaction::after{ background: radial-gradient(circle at 50% 60%, rgba(186,50,50,0.14) 0%, transparent 70%); }
 .card-extraidor::after  { background: radial-gradient(circle at 50% 60%, rgba(213,87,21,0.14) 0%, transparent 70%); }
+.card-realistic::after  { background: radial-gradient(circle at 50% 60%, rgba(124,58,237,0.14) 0%, transparent 70%); }
+.card-realistic:hover   { box-shadow: 0 28px 64px rgba(124,58,237,0.2); }
+.card-realistic .card-title span { color: #7c3aed; }
+.card-realistic .card-cta { color: #7c3aed; background: rgba(124,58,237,0.07); }
+.card-realistic:hover .card-cta { background: #7c3aed; color: #fff; }
 .card-extraidor:hover   { box-shadow: 0 28px 64px rgba(213,87,21,0.2); }
 .card-extraidor .card-title span { color: #d55715; }
 .card-extraidor .card-cta { color: #d55715; background: rgba(213,87,21,0.07); }
@@ -384,6 +389,20 @@ nav { position: relative; z-index: 20; display: grid; grid-template-columns: 1fr
           <div class="card-info">
             <div class="card-title">extrator <span>de prompt</span></div>
             <div class="card-desc">Analise qualquer imagem e extraia prompts técnicos de alta fidelidade para MidJourney, DALL-E, Stable Diffusion e Runway.</div>
+            <div class="card-cta">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Acessar
+            </div>
+          </div>
+        </a>
+
+        <a href="realistic.html" class="studio-card card-realistic">
+          <div class="card-img">
+            <img src="" alt="Realistic" loading="lazy" style="background:rgba(124,58,237,0.08)">
+          </div>
+          <div class="card-info">
+            <div class="card-title">rea <span>listic</span></div>
+            <div class="card-desc">Gere ou melhore imagens ultra realistas com extrema qualidade padrão premium.</div>
             <div class="card-cta">
               <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Acessar
