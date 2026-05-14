@@ -193,7 +193,7 @@ async function initDB() {
       navLinks: JSON.stringify([
         {label:'Sports',url:'sports.html'},{label:'Illusion',url:'illusion.html'},
         {label:'Mascot',url:'mascot.html'},{label:'Lettering',url:'lettering.html'},
-        {label:'Live Action',url:'liveaction.html'},{label:'Extrator',url:'extraidor.html'},{label:'Realistic',url:'/agent/realistic'}
+        {label:'Live Action',url:'liveaction.html'},{label:'Extrator',url:'extraidor.html'},{label:'Realistic',url:'realistic.html'}
       ]),
       tickerItems: JSON.stringify([
         {icon:'A',label:'Anthropic'},{icon:'C',label:'Claude'},{icon:'U',label:'Unreal 5'},
@@ -211,7 +211,12 @@ async function initDB() {
       ])
     };
     for (const [k,v] of Object.entries(defaults)) {
-      await pool.query('INSERT INTO site_config(key,value) VALUES($1,$2) ON CONFLICT(key) DO NOTHING', [k,v]);
+      if (k === 'cards') {
+        // Sempre atualizar cards para incluir novos agentes adicionados
+        await pool.query('INSERT INTO site_config(key,value,updated_at) VALUES($1,$2,NOW()) ON CONFLICT(key) DO UPDATE SET value=$2, updated_at=NOW()', [k,v]);
+      } else {
+        await pool.query('INSERT INTO site_config(key,value) VALUES($1,$2) ON CONFLICT(key) DO NOTHING', [k,v]);
+      }
     }
     // Criar agente Realistic automaticamente se não existir
     await pool.query(`
@@ -219,6 +224,36 @@ async function initDB() {
       VALUES('realistic','rea','listic','#7c3aed',$1)
       ON CONFLICT(slug) DO NOTHING
     `, ['Ultra-realistic 3D render of the exact image in the upload, highly detailed skin with visible pores, subtle imperfections, micro-expressions, natural asymmetry, physically accurate shading and subsurface scattering. Detailed character textures including skin microdetails, fine wrinkles, slight blemishes, realistic hair strands with natural variation, eyebrows and eyelashes individually defined. Clothing with realistic 3D fabric simulation, visible fibers, folds, stitching, and physically accurate reflections and highlights. Cinematic lighting setup, soft global illumination, realistic shadows, HDR environment lighting, natural light bounce, high dynamic range. Shot with a cinematic camera, 85mm lens, f/1.8 aperture, shallow depth of field, subject in sharp focus with creamy bokeh background, subtle chromatic aberration, film grain, lens imperfections for realism. Hyper-realistic rendering, ray tracing, global illumination, physically based rendering (PBR), ultra high resolution (8K), photorealism, Octane render, Unreal Engine 5, Redshift quality. Color grading cinematic, natural skin tones, soft contrast, slightly desaturated highlights, professional photography style.']);
+
+    // ── Patch: garantir que Realistic está nos cards sem sobrescrever customizações ──
+    try {
+      const cardsRow = await pool.query("SELECT value FROM site_config WHERE key='cards'");
+      if (cardsRow.rows.length > 0) {
+        const existingCards = JSON.parse(cardsRow.rows[0].value);
+        const hasRealistic = existingCards.some(c => c.id === 'realistic');
+        const hasNavRealistic = (() => {
+          try {
+            const navRow = pool.query("SELECT value FROM site_config WHERE key='navLinks'");
+            return false; // vai checar abaixo
+          } catch(e) { return false; }
+        })();
+        if (!hasRealistic) {
+          existingCards.push({id:'realistic',name:'rea',nameSpan:'listic',color:'#7c3aed',desc:'Gere ou melhore imagens ultra realistas com extrema qualidade padrão premium.',cta:'Acessar',url:'realistic.html',img:'',systemPrompt:''});
+          await pool.query("UPDATE site_config SET value=$1, updated_at=NOW() WHERE key='cards'", [JSON.stringify(existingCards)]);
+          console.log('Realistic adicionado aos cards existentes');
+        }
+      }
+      // Patch navLinks
+      const navRow = await pool.query("SELECT value FROM site_config WHERE key='navLinks'");
+      if (navRow.rows.length > 0) {
+        const nav = JSON.parse(navRow.rows[0].value);
+        if (!nav.some(n => n.label === 'Realistic')) {
+          nav.push({label:'Realistic',url:'realistic.html'});
+          await pool.query("UPDATE site_config SET value=$1, updated_at=NOW() WHERE key='navLinks'", [JSON.stringify(nav)]);
+          console.log('Realistic adicionado ao navLinks');
+        }
+      }
+    } catch(patchErr) { console.error('Patch realistic error:', patchErr.message); }
 
     console.log('DB initialized OK');
   } catch(err) { console.error('DB init error:', err.message); }
