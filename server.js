@@ -212,12 +212,7 @@ async function initDB() {
       ])
     };
     for (const [k,v] of Object.entries(defaults)) {
-      if (k === 'cards') {
-        // Sempre atualizar cards para incluir novos agentes adicionados
-        await pool.query('INSERT INTO site_config(key,value,updated_at) VALUES($1,$2,NOW()) ON CONFLICT(key) DO UPDATE SET value=$2, updated_at=NOW()', [k,v]);
-      } else {
-        await pool.query('INSERT INTO site_config(key,value) VALUES($1,$2) ON CONFLICT(key) DO NOTHING', [k,v]);
-      }
+      await pool.query('INSERT INTO site_config(key,value) VALUES($1,$2) ON CONFLICT(key) DO NOTHING', [k,v]);
     }
     // Criar agente Realistic automaticamente se não existir
     await pool.query(`
