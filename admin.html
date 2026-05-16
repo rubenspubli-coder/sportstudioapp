@@ -199,7 +199,7 @@
             <button type="button" class="rte-btn rte-sm" title="Ver HTML" onclick="rteToggleHtml()">HTML</button>
           </div>
         </div>
-        <div id="cfg-hl-editor" class="rte-editor" contenteditable="true" oninput="rteSyncToTextarea()"></div>
+        <div id="cfg-hl-editor" class="rte-editor" contenteditable="true" oninput="rteSyncToTextarea()" onkeydown="rteEnter(event,this,rteSyncToTextarea)"></div>
         <textarea id="cfg-hl" class="rte-source" style="display:none"></textarea>
       </div>
       <label>Sub-headline</label>
@@ -239,7 +239,7 @@
             <button type="button" class="rte-btn rte-sm" title="Ver HTML" onclick="rteToggleHtml2()">HTML</button>
           </div>
         </div>
-        <div id="cfg-sub-editor" class="rte-editor" contenteditable="true" oninput="rteSyncToTextarea2()"></div>
+        <div id="cfg-sub-editor" class="rte-editor" contenteditable="true" oninput="rteSyncToTextarea2()" onkeydown="rteEnter(event,this,rteSyncToTextarea2)"></div>
         <textarea id="cfg-sub" class="rte-source" style="display:none"></textarea>
       </div>
       <button class="sb" onclick="save('hero')">Salvar Hero</button>
@@ -364,6 +364,21 @@ async function showPanel(name){
 
 var rteHtmlMode=false;
 var rteHtmlMode2=false;
+function rteEnter(e,ed,sync){
+  if(e.key!=='Enter')return;
+  e.preventDefault();
+  var sel=window.getSelection();
+  if(!sel.rangeCount)return;
+  var range=sel.getRangeAt(0);
+  range.deleteContents();
+  var br=document.createElement('br');
+  range.insertNode(br);
+  range.setStartAfter(br);
+  range.setEndAfter(br);
+  sel.removeAllRanges();
+  sel.addRange(range);
+  sync();
+}
 
 function rteExec(edId,taId,sync,cmd,val){
   var ed=document.getElementById(edId);
