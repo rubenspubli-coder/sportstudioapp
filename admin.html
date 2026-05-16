@@ -100,6 +100,18 @@
   .agent-prompt-section { background:rgba(124,58,237,.06); border:1px solid rgba(124,58,237,.2); border-radius:10px; padding:16px; margin-top:12px; }
   .agent-prompt-section label { color:var(--accent2); }
   .agent-prompt-section textarea { min-height:140px; font-size:12px; font-family:'DM Sans',monospace; }
+  .rte-wrap { border:1.5px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:16px; }
+  .rte-toolbar { background:rgba(255,255,255,.04); border-bottom:1px solid var(--border); padding:6px 8px; display:flex; flex-wrap:wrap; align-items:center; gap:4px; }
+  .rte-group { display:flex; align-items:center; gap:2px; }
+  .rte-sep { width:1px; height:20px; background:var(--border); margin:0 4px; }
+  .rte-btn { background:rgba(255,255,255,.06); border:1px solid transparent; border-radius:6px; padding:4px 9px; font-size:12px; color:var(--fg); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .15s; white-space:nowrap; }
+  .rte-btn:hover { background:rgba(255,255,255,.14); border-color:var(--border2); }
+  .rte-italic { font-style:italic; }
+  .rte-strike { text-decoration:line-through; }
+  .rte-select { background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:4px 6px; font-size:12px; color:var(--fg); cursor:pointer; font-family:'DM Sans',sans-serif; outline:none; }
+  .rte-color-lbl { background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:4px 9px; font-size:12px; color:var(--fg); cursor:pointer; position:relative; font-weight:700; user-select:none; }
+  .rte-editor { min-height:100px; padding:12px 14px; font-size:14px; color:var(--fg); outline:none; background:transparent; line-height:1.5; }
+  .rte-source { min-height:100px; width:100%; background:rgba(0,0,0,.3); border:none; border-top:1px solid var(--border); padding:12px 14px; font-size:12px; color:#a5f3fc; font-family:monospace; resize:vertical; outline:none; margin-bottom:0; border-radius:0; }
   .agent-color-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
   .agent-color-row input[type=color] { width:40px; height:36px; border:1px solid var(--border); border-radius:8px; background:transparent; cursor:pointer; padding:2px; }
   .agent-color-row input[type=text] { flex:1; margin-bottom:0; }
@@ -146,8 +158,56 @@
   <div class="ab">
     <div class="st">Hero Section</div>
     <div class="card">
-      <label>Headline principal (HTML permitido)</label>
-      <textarea id="cfg-hl"></textarea>
+      <label>Headline principal</label>
+      <div class="rte-wrap">
+        <div class="rte-toolbar">
+          <div class="rte-group">
+            <button type="button" class="rte-btn" title="Negrito" onclick="rteCmd('bold')"><b>B</b></button>
+            <button type="button" class="rte-btn rte-italic" title="Itálico" onclick="rteCmd('italic')"><i>I</i></button>
+            <button type="button" class="rte-btn" title="Sublinhado" onclick="rteCmd('underline')"><u>U</u></button>
+            <button type="button" class="rte-btn rte-strike" title="Tachado" onclick="rteCmd('strikeThrough')">S</button>
+          </div>
+          <div class="rte-sep"></div>
+          <div class="rte-group">
+            <button type="button" class="rte-btn" title="Alinhar esquerda" onclick="rteCmd('justifyLeft')">&#8676;</button>
+            <button type="button" class="rte-btn" title="Centralizar" onclick="rteCmd('justifyCenter')">&#8633;</button>
+            <button type="button" class="rte-btn" title="Alinhar direita" onclick="rteCmd('justifyRight')">&#8677;</button>
+          </div>
+          <div class="rte-sep"></div>
+          <div class="rte-group">
+            <select class="rte-select" title="Tamanho" onchange="rteFontSize(this.value)">
+              <option value="">Tamanho</option>
+              <option value="1">Tiny</option>
+              <option value="2">Pequeno</option>
+              <option value="3">Normal</option>
+              <option value="4">Médio</option>
+              <option value="5">Grande</option>
+              <option value="6">Maior</option>
+              <option value="7">Enorme</option>
+            </select>
+            <select class="rte-select" title="Estilo" onchange="rteBlock(this.value)">
+              <option value="">Bloco</option>
+              <option value="p">Parágrafo</option>
+              <option value="h1">H1</option>
+              <option value="h2">H2</option>
+              <option value="h3">H3</option>
+              <option value="div">Div</option>
+            </select>
+          </div>
+          <div class="rte-sep"></div>
+          <div class="rte-group">
+            <label class="rte-color-lbl" title="Cor do texto">A <input type="color" onchange="rteColor(this.value)" value="#ffffff" style="opacity:0;position:absolute;width:0;height:0"></label>
+            <button type="button" class="rte-btn" title="Inserir gradiente AI Studio" onclick="rteInsertGradient()">&#9733; Grad</button>
+            <button type="button" class="rte-btn" title="Limpar formatação" onclick="rteCmd('removeFormat')">&#10005; Fmt</button>
+          </div>
+          <div class="rte-sep"></div>
+          <div class="rte-group">
+            <button type="button" class="rte-btn rte-sm" title="Ver HTML" onclick="rteToggleHtml()">HTML</button>
+          </div>
+        </div>
+        <div id="cfg-hl-editor" class="rte-editor" contenteditable="true" oninput="rteSyncToTextarea()"></div>
+        <textarea id="cfg-hl" class="rte-source" style="display:none"></textarea>
+      </div>
       <label>Sub-headline (HTML permitido)</label>
       <textarea id="cfg-sub"></textarea>
       <button class="sb" onclick="save('hero')">Salvar Hero</button>
@@ -270,12 +330,45 @@ async function showPanel(name){
   await loadCfg();
 }
 
+var rteHtmlMode=false;
+function rteCmd(cmd){document.getElementById('cfg-hl-editor').focus();document.execCommand(cmd,false,null);rteSyncToTextarea();}
+function rteFontSize(v){if(!v)return;document.getElementById('cfg-hl-editor').focus();document.execCommand('fontSize',false,v);rteSyncToTextarea();}
+function rteBlock(v){if(!v)return;document.getElementById('cfg-hl-editor').focus();document.execCommand('formatBlock',false,v);rteSyncToTextarea();}
+function rteColor(v){document.getElementById('cfg-hl-editor').focus();document.execCommand('foreColor',false,v);rteSyncToTextarea();}
+function rteInsertGradient(){
+  document.getElementById('cfg-hl-editor').focus();
+  document.execCommand('insertHTML',false,'<span style="background:linear-gradient(to left,#6366f1,#a855f7,#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">AI Studio</span>');
+  rteSyncToTextarea();
+}
+function rteSyncToTextarea(){
+  var ed=document.getElementById('cfg-hl-editor');
+  var ta=document.getElementById('cfg-hl');
+  if(!rteHtmlMode)ta.value=ed.innerHTML;
+}
+function rteToggleHtml(){
+  var ed=document.getElementById('cfg-hl-editor');
+  var ta=document.getElementById('cfg-hl');
+  rteHtmlMode=!rteHtmlMode;
+  if(rteHtmlMode){
+    ta.value=ed.innerHTML;
+    ta.style.display='block';
+    ed.style.display='none';
+    ta.oninput=function(){ed.innerHTML=ta.value;};
+  } else {
+    ed.innerHTML=ta.value;
+    ed.style.display='block';
+    ta.style.display='none';
+    ta.oninput=null;
+  }
+}
 async function loadCfg(){
   try{
     var r=await fetch('/admin/config',{headers:{'Authorization':'Bearer '+token}});
     if(r.status===401){doLogout();return;}
     var c=await r.json();
-    document.getElementById('cfg-hl').value=c.headline||'Cinematic\n<br><span class="gradient-text">AI Studio</span>';
+    var hlVal=c.headline||'Cinematic<br><span class="gradient-text">AI Studio</span>';
+    document.getElementById('cfg-hl').value=hlVal;
+    document.getElementById('cfg-hl-editor').innerHTML=hlVal;
     document.getElementById('cfg-sub').value=c.subheadline||'';
     var vu=c.videoUrl||'';document.getElementById('cfg-vid').value=vu;
     if(vu){var v=document.getElementById('vp');v.src=vu;v.load();}
