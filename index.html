@@ -1734,8 +1734,6 @@ window.addEventListener('scroll',function(){
     if(!r.ok) return;
     var cfg=await r.json();
     if(cfg.videoUrl){var vid=document.getElementById('hero-video');if(vid){vid.src=cfg.videoUrl;vid.load();}}
-    if(cfg.headline){var h1=document.getElementById('hero-headline');if(h1) h1.innerHTML=cfg.headline;}
-    if(cfg.subheadline){var sub=document.getElementById('hero-sub');if(sub) sub.innerHTML=cfg.subheadline;}
   }catch(e){}
 })();
 
