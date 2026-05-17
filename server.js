@@ -654,11 +654,16 @@ const server = http.createServer(async (req, res) => {
 
   // ── Config pública ───────────────────────────────────────────────────────
   if(req.method==='GET' && url==='/config.json') {
-    if(!pool)return sendJSON(res,200,{});
+    if(!pool){
+      res.writeHead(200,{'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Cache-Control':'no-cache,no-store,must-revalidate','Pragma':'no-cache'});
+      res.end('{}');
+      return;
+    }
     try{
       const r=await pool.query('SELECT key,value FROM site_config');
       const cfg={};for(const row of r.rows){try{cfg[row.key]=JSON.parse(row.value);}catch{cfg[row.key]=row.value;}}
-      sendJSON(res,200,cfg);
+      res.writeHead(200,{'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Cache-Control':'no-cache,no-store,must-revalidate','Pragma':'no-cache'});
+      res.end(JSON.stringify(cfg));
     }catch(e){sendJSON(res,500,{error:e.message});}
     return;
   }
