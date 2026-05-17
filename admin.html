@@ -390,18 +390,27 @@ function rteExec(edId,taId,sync,cmd,val){
 function rteCmd(cmd){rteExec('cfg-hl-editor','cfg-hl',rteSyncToTextarea,cmd);}
 function rteCmd2(cmd){rteExec('cfg-sub-editor','cfg-sub',rteSyncToTextarea2,cmd);}
 
-function rteFontSizePx(v){
+function _applyFontSizePx(edId,syncFn,v){
   if(!v)return;
-  var ed=document.getElementById('cfg-hl-editor');ed.focus();
-  document.execCommand('insertHTML',false,'<span style="font-size:'+v+'px">'+( window.getSelection().toString()||'&ZeroWidthSpace;')+'</span>');
-  rteSyncToTextarea();
+  var ed=document.getElementById(edId);ed.focus();
+  var sel=window.getSelection();
+  if(!sel||!sel.rangeCount)return;
+  var range=sel.getRangeAt(0);
+  if(range.collapsed){
+    var sp=document.createElement('span');sp.style.fontSize=v+'px';sp.textContent='​';
+    range.insertNode(sp);range.setStartAfter(sp);range.setEndAfter(sp);sel.removeAllRanges();sel.addRange(range);
+  }else{
+    var frag=range.extractContents();
+    // remover font-size de todos os elementos internos para evitar conflito
+    frag.querySelectorAll('*').forEach(function(el){el.style.fontSize='';});
+    var sp=document.createElement('span');sp.style.fontSize=v+'px';sp.appendChild(frag);
+    range.insertNode(sp);
+    var nr=document.createRange();nr.selectNodeContents(sp);sel.removeAllRanges();sel.addRange(nr);
+  }
+  syncFn();
 }
-function rteFontSizePx2(v){
-  if(!v)return;
-  var ed=document.getElementById('cfg-sub-editor');ed.focus();
-  document.execCommand('insertHTML',false,'<span style="font-size:'+v+'px">'+(window.getSelection().toString()||'&ZeroWidthSpace;')+'</span>');
-  rteSyncToTextarea2();
-}
+function rteFontSizePx(v){_applyFontSizePx('cfg-hl-editor',rteSyncToTextarea,v);}
+function rteFontSizePx2(v){_applyFontSizePx('cfg-sub-editor',rteSyncToTextarea2,v);}
 
 function rteAlign(v){
   var ed=document.getElementById('cfg-hl-editor');ed.focus();
