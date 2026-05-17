@@ -675,6 +675,18 @@ const server = http.createServer(async (req, res) => {
     '/extraidor':'extraidor.html','/extraidor.html':'extraidor.html',
     '/realistic':'realistic.html','/realistic.html':'realistic.html',
   };
+  // Serve static assets (images, fonts, etc.)
+  const ext = path.extname(url).toLowerCase();
+  const staticMime = {'.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.gif':'image/gif','.svg':'image/svg+xml','.webp':'image/webp','.ico':'image/x-icon','.css':'text/css','.js':'application/javascript','.woff':'font/woff','.woff2':'font/woff2'};
+  if(staticMime[ext]){
+    const filePath=path.join(__dirname,url);
+    fs.readFile(filePath,(err,data)=>{
+      if(err){res.writeHead(404);res.end('Not found');return;}
+      res.writeHead(200,{'Content-Type':staticMime[ext]});
+      res.end(data);
+    });
+    return;
+  }
   const fileName=urlMap[url]||null;
   if(!fileName){res.writeHead(404);res.end('Not found');return;}
   fs.readFile(path.join(__dirname,fileName),(err,data)=>{
