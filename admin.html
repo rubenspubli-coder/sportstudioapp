@@ -120,6 +120,26 @@
   .agent-color-row input[type=text] { flex:1; margin-bottom:0; }
   .save-card-btn { background:var(--accent); border:none; border-radius:8px; padding:9px 22px; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#fff; cursor:pointer; transition:background .2s; margin-top:4px; }
   .save-card-btn:hover { background:var(--accent2); }
+  /* Slider section */
+  .slide-item { background:var(--surface2,#16112a); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px; }
+  .slide-item-header { display:flex; align-items:center; gap:12px; margin-bottom:0; }
+  .slide-thumb { width:54px; height:76px; object-fit:cover; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid var(--border); flex-shrink:0; }
+  .slide-item-num { font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; flex:1; }
+  .slide-toggle { background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:6px; padding:5px 12px; font-size:11px; color:var(--muted); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .2s; }
+  .slide-toggle:hover { background:rgba(255,255,255,0.1); color:var(--fg); }
+  .slide-body { display:none; margin-top:14px; }
+  .slide-body.open { display:block; }
+  .slide-img-upload { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .slide-img-preview { width:70px; height:100px; object-fit:cover; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid var(--border); flex-shrink:0; }
+  .slide-img-drop { flex:1; border:1.5px dashed var(--border2); border-radius:10px; padding:14px; text-align:center; cursor:pointer; position:relative; transition:all .2s; }
+  .slide-img-drop:hover { border-color:var(--accent); background:rgba(124,58,237,.05); }
+  .slide-img-drop input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+  .slide-img-drop p { font-size:12px; color:var(--muted); margin:0; pointer-events:none; }
+  .slide-row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .slide-row2 input { margin-bottom:0; }
+  .slide-badge-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .slide-badge-row input[type=color] { width:40px; height:36px; border:1px solid var(--border); border-radius:8px; background:transparent; cursor:pointer; padding:2px; flex-shrink:0; }
+  .slide-badge-row input[type=text] { flex:1; margin-bottom:0; }
   .del-card-btn { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:8px; padding:9px 16px; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; text-transform:uppercase; color:#f87171; cursor:pointer; margin-top:4px; margin-left:8px; transition:all .2s; }
   .del-card-btn:hover { background:rgba(239,68,68,.18); }
   .add-card-wrap { border:1.5px dashed var(--border2); border-radius:12px; padding:20px; text-align:center; cursor:pointer; transition:all .2s; }
@@ -306,6 +326,14 @@
     </div>
 
     
+    <div class="st">Slider de Imagens — Showcase</div>
+    <div class="card">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5">Imagens do slider coverflow na seção "Showcase". Clique em cada slide para editar. Recomendado: imagens no formato retrato (3:4), mín. 480×680px, máx. 1MB.</p>
+      <div id="slider-editor"></div>
+      <button class="addb" onclick="addSlide()">+ Adicionar slide</button>
+      <button class="sb" onclick="saveSlider()">Salvar Slider</button>
+    </div>
+
     <div class="st">Cards da Home</div>
     <div id="cards-editor"></div>
     <div class="add-card-wrap" onclick="addNewCard()">
@@ -499,6 +527,7 @@ async function loadCfg(){
     renderTick(ti);
     if(c.faviconBase64)loadFaviconPreview(c.faviconBase64);
     loadCardsFromCfg(c);
+    loadSliderFromCfg(c);
   }catch(e){toast('Erro ao carregar: '+e.message,'err');}
 }
 
@@ -792,6 +821,137 @@ function addNewCard() {
     last.querySelector('.card-editor-toggle').textContent = 'Fechar ▴';
     last.scrollIntoView({behavior:'smooth', block:'center'});
   }
+}
+
+// ── Slider de Imagens ─────────────────────────────────────────────────────
+var sliderData = [];
+
+var SLIDE_DEFAULTS = [
+  {tag:'Sports',    title:'Campanha Final de Champions', meta:'2024 · 60s spot',  badge:'SP',badgeColor:'#d92b3a',rating:'9.1',img:''},
+  {tag:'Lettering', title:'Logo cinemático',            meta:'2024 · Brand film', badge:'LT',badgeColor:'#e07b20',rating:'7.3',img:''},
+  {tag:'Mascot',    title:'Mascote 3D · Premier',       meta:'2024 · Identity',   badge:'MC',badgeColor:'#2563eb',rating:'8.7',img:''},
+  {tag:'Live Action',title:'Cena épica — Runway',       meta:'2024 · 30s spot',   badge:'LA',badgeColor:'#7c3aed',rating:'7.8',img:''},
+  {tag:'Illusion',  title:'Mundo lúdico — Fairytale',   meta:'2024 · Editorial',  badge:'IL',badgeColor:'#a855f7',rating:'8.2',img:''},
+  {tag:'Realistic', title:'Retrato ultra realista',     meta:'2024 · Portrait',   badge:'RE',badgeColor:'#0d9488',rating:'9.1',img:''},
+  {tag:'Sports',    title:'Goleiro — anúncio iGaming',  meta:'2024 · 15s spot',   badge:'SP',badgeColor:'#d92b3a',rating:'7.5',img:''},
+  {tag:'Lettering', title:'Type cinema — gold',         meta:'2024 · Editorial',  badge:'LT',badgeColor:'#e07b20',rating:'8.0',img:''},
+  {tag:'Mascot',    title:'Mascote esportivo',          meta:'2024 · Brand',      badge:'MC',badgeColor:'#2563eb',rating:'7.9',img:''},
+];
+
+function loadSliderFromCfg(cfg) {
+  sliderData = Array.isArray(cfg.sliderItems) && cfg.sliderItems.length
+    ? cfg.sliderItems.map(function(s,i){ return Object.assign({},SLIDE_DEFAULTS[i]||{},s); })
+    : SLIDE_DEFAULTS.map(function(d){ return Object.assign({},d); });
+  renderSliderEditor();
+}
+
+function renderSliderEditor() {
+  var el = document.getElementById('slider-editor');
+  if (!el) return;
+  el.innerHTML = sliderData.map(function(s, i) {
+    var hasImg = !!(s.img && s.img.length > 10);
+    return '<div class="slide-item" id="slide-item-'+i+'">' +
+      '<div class="slide-item-header">' +
+        '<img class="slide-thumb" src="'+(hasImg?s.img:'')+'" alt="" style="'+(hasImg?'':'opacity:.3')+'">' +
+        '<span class="slide-item-num">Slide '+(i+1)+' · '+esc(s.tag)+'</span>' +
+        '<button class="slide-toggle" onclick="toggleSlide('+i+')">Editar ▾</button>' +
+        '<button class="db" onclick="removeSlide('+i+')" style="padding:5px 10px" title="Remover">✕</button>' +
+      '</div>' +
+      '<div class="slide-body" id="slide-body-'+i+'">' +
+        '<div class="slide-img-upload">' +
+          '<img class="slide-img-preview" id="slide-prev-'+i+'" src="'+(hasImg?s.img:'')+'" alt="" style="'+(hasImg?'':'opacity:.25')+'">' +
+          '<div class="slide-img-drop">' +
+            '<input type="file" accept="image/*" onchange="onSlideImgSelect(this,'+i+')">' +
+            '<p><strong>Clique para enviar imagem</strong>JPG/PNG/WEBP · máx. 1 MB<br><span style="font-size:10px;color:var(--accent2)">'+(hasImg?'✓ Imagem carregada':'Nenhuma imagem')+'</span></p>' +
+          '</div>' +
+        '</div>' +
+        '<div class="slide-row2">' +
+          '<input type="text" placeholder="Categoria (ex: Sports)" value="'+esc(s.tag||'')+'" oninput="sliderData['+i+'].tag=this.value">' +
+          '<input type="text" placeholder="Rating (ex: 9.1)" value="'+esc(s.rating||'')+'" oninput="sliderData['+i+'].rating=this.value">' +
+        '</div>' +
+        '<input type="text" placeholder="Título do slide" value="'+esc(s.title||'')+'" oninput="sliderData['+i+'].title=this.value">' +
+        '<input type="text" placeholder="Meta (ex: 2024 · 30s spot)" value="'+esc(s.meta||'')+'" oninput="sliderData['+i+'].meta=this.value">' +
+        '<div class="slide-badge-row">' +
+          '<input type="color" value="'+(s.badgeColor||'#d92b3a')+'" oninput="sliderData['+i+'].badgeColor=this.value">' +
+          '<input type="text" placeholder="Badge (ex: SP)" value="'+esc(s.badge||'')+'" oninput="sliderData['+i+'].badge=this.value" maxlength="4">' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function toggleSlide(idx) {
+  var body = document.getElementById('slide-body-'+idx);
+  var btn = document.querySelector('#slide-item-'+idx+' .slide-toggle');
+  if (!body) return;
+  var open = body.classList.toggle('open');
+  btn.textContent = open ? 'Fechar ▴' : 'Editar ▾';
+}
+
+function removeSlide(idx) {
+  if (!confirm('Remover slide '+(idx+1)+'?')) return;
+  sliderData.splice(idx, 1);
+  renderSliderEditor();
+}
+
+function addSlide() {
+  sliderData.push({tag:'Novo',title:'Novo slide',meta:'2024',badge:'AI',badgeColor:'#d92b3a',rating:'',img:''});
+  renderSliderEditor();
+  var items = document.querySelectorAll('.slide-item');
+  var last = items[items.length-1];
+  if (last) {
+    var idx = sliderData.length - 1;
+    document.getElementById('slide-body-'+idx).classList.add('open');
+    document.querySelector('#slide-item-'+idx+' .slide-toggle').textContent = 'Fechar ▴';
+    last.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+function onSlideImgSelect(input, idx) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 1024*1024) { toast('Imagem muito grande. Máx. 1 MB.','err'); input.value=''; return; }
+  // Comprime via canvas
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var MAX = 720;
+      var w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      sliderData[idx].img = dataUrl;
+      var prev = document.getElementById('slide-prev-'+idx);
+      if (prev) { prev.src = dataUrl; prev.style.opacity = '1'; }
+      var thumb = document.querySelector('#slide-item-'+idx+' .slide-thumb');
+      if (thumb) { thumb.src = dataUrl; thumb.style.opacity = '1'; }
+      // update drop label
+      var drop = input.parentElement.querySelector('p span');
+      if (drop) drop.textContent = '✓ Imagem carregada';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveSlider() {
+  try {
+    var r = await fetch('/admin/config', {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({sliderItems: sliderData})
+    });
+    if (r.status===401){doLogout();return;}
+    var d = await r.json();
+    if (!d.ok) throw new Error(d.error||'Erro');
+    toast('✓ Slider salvo! Recarregue o site para ver.');
+  } catch(e) { toast(e.message,'err'); }
 }
 
 // Boot: carregar vídeo de login publicamente + restaurar sessão
