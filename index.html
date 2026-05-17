@@ -191,13 +191,11 @@ section { position: relative; }
   z-index: -2;
   width: 100%; height: 100%;
   object-fit: cover;
-  filter: saturate(0.85) contrast(1.05) brightness(0.55);
+  filter: saturate(0.85) contrast(1.05) brightness(0.85);
 }
 .hero-overlay {
   position: absolute; inset: 0; z-index: -1;
-  background:
-    radial-gradient(1200px 800px at 50% 30%, rgba(7,7,10,0.2), rgba(7,7,10,0.85) 70%),
-    linear-gradient(180deg, rgba(7,7,10,0.55) 0%, rgba(7,7,10,0.4) 40%, var(--bg) 100%);
+  background: linear-gradient(180deg, transparent 50%, rgba(7,7,10,0.7) 80%, var(--bg) 100%);
 }
 .hero-grain {
   position: absolute; inset: 0; z-index: -1;
@@ -1135,7 +1133,7 @@ footer {
 /* --- Allotrope overrides --- */
 .logo { font-family: "Allotrope", "Raleway", sans-serif !important; font-style: italic; font-weight: 900; font-size: 20px; letter-spacing: 0.02em; }
 .logo em { font-style: italic; background: linear-gradient(90deg, #f5b056 0%, #e08a3c 60%, #d9b27a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.hero-headline { font-family: "Raleway", sans-serif !important; font-style: normal; font-weight: 300; font-size: clamp(46px,8vw,108px); letter-spacing: -0.01em; line-height: 1.08; }
+.hero-headline { font-family: "Raleway", sans-serif !important; font-style: normal; font-weight: 300; font-size: clamp(34px,5vw,72px); letter-spacing: -0.01em; line-height: 1.08; }
 .hero-headline em { font-style: italic; font-weight: 300; color: #f5b056; }
 .agent-card h3 { font-family: "Allotrope", "Raleway", sans-serif !important; font-style: italic; font-weight: 900; font-size: 24px; }
 .mentor-img .signature { font-family: "Raleway", sans-serif !important; font-style: normal; font-weight: 300; }
