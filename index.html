@@ -609,8 +609,8 @@ section { position: relative; }
 }
 .coverflow-stage {
   position: relative;
-  height: 390px;
-  perspective: 1100px;
+  height: 520px;
+  perspective: 1200px;
   perspective-origin: 50% 50%;
   overflow: visible;
   z-index: 1;
@@ -618,9 +618,9 @@ section { position: relative; }
 .cf-card {
   position: absolute;
   left: 50%; top: 50%;
-  width: 240px; height: 336px;
-  margin-left: -120px; margin-top: -168px;
-  border-radius: 14px;
+  width: 340px; height: 476px;
+  margin-left: -170px; margin-top: -238px;
+  border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
   transition: transform .55s cubic-bezier(.25,.46,.45,.94), opacity .55s ease, filter .55s ease, box-shadow .55s ease;
@@ -713,12 +713,12 @@ section { position: relative; }
 }
 .cf-dot.is-active { background: #f5b056; width: 20px; }
 @media (max-width: 499px) {
-  .cf-card { width: 175px; height: 245px; margin-left: -87px; margin-top: -122px; border-radius: 12px; }
-  .coverflow-stage { height: 320px; }
+  .cf-card { width: 240px; height: 336px; margin-left: -120px; margin-top: -168px; border-radius: 13px; }
+  .coverflow-stage { height: 420px; }
 }
 @media (min-width: 500px) and (max-width: 767px) {
-  .cf-card { width: 200px; height: 280px; margin-left: -100px; margin-top: -140px; }
-  .coverflow-stage { height: 360px; }
+  .cf-card { width: 280px; height: 392px; margin-left: -140px; margin-top: -196px; }
+  .coverflow-stage { height: 470px; }
 }
 
 /* ---------- pricing ---------- */
@@ -1218,6 +1218,10 @@ body.loaded { opacity: 1; }
 
 /* ── Original Studio Cards ── */
 .studios { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; max-width: 1100px; width: 100%; }
+@media (max-width: 640px) {
+  .studios { gap: 22px; flex-direction: column; align-items: center; }
+  .studio-card { min-width: unset; max-width: 100%; width: 100%; }
+}
 
 /* ── Card base glassmorphism ── */
 .studio-card {
@@ -1939,7 +1943,7 @@ window.addEventListener('load',function(){
     cfUpdate();
   }
 
-  function cfTx(){var vw=window.innerWidth;return vw<500?130:vw<768?185:280;}
+  function cfTx(){var vw=window.innerWidth;return vw<500?155:vw<768?210:300;}
 
   function cfUpdate(){
     var tx=cfTx();
