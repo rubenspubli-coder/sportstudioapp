@@ -1133,7 +1133,7 @@ footer {
 /* --- Allotrope overrides --- */
 .logo { font-family: "Allotrope", "Raleway", sans-serif !important; font-style: italic; font-weight: 900; font-size: 20px; letter-spacing: 0.02em; }
 .logo em { font-style: italic; background: linear-gradient(90deg, #f5b056 0%, #e08a3c 60%, #d9b27a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.hero-headline { font-family: "Raleway", sans-serif !important; font-style: normal; font-weight: 300; font-size: clamp(34px,5vw,72px); letter-spacing: -0.01em; line-height: 1.08; }
+.hero-headline { font-family: "Raleway", sans-serif !important; font-style: normal; font-weight: 300; font-size: clamp(34px,5vw,72px); letter-spacing: -0.01em; line-height: 1.08; text-shadow: 0 2px 24px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.4); }
 .hero-headline em { font-style: italic; font-weight: 300; color: #f5b056; }
 .hero-headline strong, .hero-headline b { font-weight: 300; }
 .agent-card h3 { font-family: "Allotrope", "Raleway", sans-serif !important; font-style: italic; font-weight: 900; font-size: 24px; }
@@ -1733,8 +1733,6 @@ window.addEventListener('scroll',function(){
     if(!r.ok) return;
     var cfg=await r.json();
     if(cfg.videoUrl){var vid=document.getElementById('hero-video');if(vid){vid.src=cfg.videoUrl;vid.load();}}
-    if(cfg.headline){var h1=document.getElementById('hero-headline');if(h1)h1.innerHTML=cfg.headline;}
-    if(cfg.subheadline){var sub=document.getElementById('hero-sub');if(sub)sub.innerHTML=cfg.subheadline;}
     if(cfg.overlayColor||cfg.overlayOpacity!==undefined){
       var ov=document.querySelector('.hero-overlay');
       if(ov){
